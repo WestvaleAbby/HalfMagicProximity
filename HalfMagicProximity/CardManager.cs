@@ -50,6 +50,7 @@ namespace HalfMagicProximity
                     }
                     if (illegalSetCode) continue;
 
+                    // This card is legal, add it to the list
                     AddCard(node);
                 }
             }
