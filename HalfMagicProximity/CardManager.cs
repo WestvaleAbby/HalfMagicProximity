@@ -44,7 +44,7 @@ namespace HalfMagicProximity
                     {
                         if (GetProperty(node, CardProperty.SetCode).Contains(bannedCode))
                         {
-                            illegalSetCode = true; 
+                            illegalSetCode = true;
                             break;
                         }
                     }
@@ -54,7 +54,7 @@ namespace HalfMagicProximity
                     AddCard(node);
                 }
             }
-            
+
             if (cardCount == 0)
                 Logger.Error("No legal cards found!");
             else
@@ -71,7 +71,11 @@ namespace HalfMagicProximity
         // Extract the value of a json element's property as a string
         private string GetProperty(JsonElement element, CardProperty property)
         {
-            return element.GetProperty(PropertyString(property)).ToString();
+            string stringProperty = element.GetProperty(PropertyString(property)).ToString();
+
+            if (string.IsNullOrEmpty(stringProperty)) Logger.Error($"Card JSON missing {property} value.");
+
+            return stringProperty;
         }
 
         // Enum to facilitate accessing specific json card properties. Maintain alphabetization
