@@ -64,29 +64,28 @@ namespace HalfMagicProximity
         {
             string name = GetCardProperty(jsonCard, CardProperty.Name);
 
-            JsonElement frontJson = jsonCard.GetProperty("card_faces")[0];
-            JsonElement backJson = jsonCard.GetProperty("card_faces")[1];
+            JsonElement jsonFaces = jsonCard.GetProperty("card_faces");
 
-            CardData frontCard = new CardData(
-                name,
-                GetCardProperty(frontJson, CardProperty.ManaCost),
-                ArtFileName(name, CardFace.Front, GetCardProperty(frontJson, CardProperty.Artist)),
-                CardFace.Front);
-            Cards.Add(frontCard);
-            Logger.Debug($"Added {frontCard.GetDisplayString()}");
+            for (int i = 0; i < jsonFaces.GetArrayLength(); i++)
+            {
+                CardFace face = (i == 0 ? CardFace.Front : CardFace.Back);
+                string artist = GetCardProperty(jsonFaces[i], CardProperty.Artist);
 
-            CardData backCard = new CardData(
-                name,
-                GetCardProperty(backJson, CardProperty.ManaCost),
-                ArtFileName(name, CardFace.Back),
-                CardFace.Back);
-            Cards.Add(backCard);
-            Logger.Debug($"Added {backCard.GetDisplayString()}");
+                CardData card = new CardData(
+                    name,
+                    GetCardProperty(jsonFaces[i], CardProperty.ManaCost),
+                    ArtFileName(name, face, artist),
+                    artist,
+                    face);
+
+                Cards.Add(card);
+                Logger.Debug($"Added {card.GetDisplayString()}");
+            }
         }
 
         private const string ART_FILE_EXTENSION = ".jpg";
 
-        private string ArtFileName(string name, CardFace face, string artist = "")
+        private string ArtFileName(string name, CardFace face, string artist)
         {
             if (face == CardFace.Front)
             {
