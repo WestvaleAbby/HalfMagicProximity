@@ -24,7 +24,7 @@ namespace HalfMagicProximity
             // Run proximity
         }
 
-        private string[] testCards = { "Alive // Well", "Fae of Wishes // Granted", "Find // Finality", "Hide // Seek", "Road // Ruin", "Night // Day" };
+        private string[] testCards = { "Alive // Well", "Fae of Wishes // Granted", "Find // Finality", "Hide // Seek", "Road // Ruin", "Night // Day", "Fast // Furious" };
 
         private void GenerateDeckFiles()
         {

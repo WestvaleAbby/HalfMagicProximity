@@ -1,7 +1,7 @@
 ﻿namespace HalfMagicProximity
 {
-    public enum CardFace { Front, Back, };
-    public enum CardLayout { Split, Adventure, None};
+    public enum CardFace { Front, Back };
+    public enum CardLayout { Split, Adventure, None };
 
     public class CardData
     {

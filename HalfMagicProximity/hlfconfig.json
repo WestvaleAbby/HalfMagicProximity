@@ -6,6 +6,20 @@
 		"ArtFileExtension": ".jpg",
 		"ProxyRarityOverride": "uncommon",
 		"DeleteBadFaces": false,
-		"IllegalSetCodes": [ "htr", "cmb" ]
+		"IllegalSetCodes": [ "htr", "cmb" ],
+		"UseDebugCardSubset": true,
+		"DebugCards": [ "Alive // Well", "Fae of Wishes // Granted", "Find // Finality", "Hide // Seek", "Road // Ruin", "Night // Day", "Fast // Furious", "Order of Midnight // Alter Fate" ],
+		"ManualArtistOverrides": [
+			{
+				"card": "Granted",
+				"face": "Back",
+				"artist": "Wylie Beckert"
+			},
+			{
+				"card": "Order of Midnight // Alter Fate",
+				"face": "Back",
+				"artist": "Seb McKinnon"
+			}
+		]
 	}
 }
