@@ -24,16 +24,16 @@
         }
 
         /// <summary>
-        /// Parses the mana cost of a card to determine its colors and color count. Assigns to those variables directly rather than returning any values
+        /// Parses the mana cost of a card to determine its colors and color count
         /// </summary>
         /// <param name="manaCost"> The card's mana cost as a string</param>
         private void GetColorData(string manaCost)
         {
             manaCost = manaCost.ToLower();
 
-            string[] colors = { "w", "u", "b", "r", "g" };
+            char[] colors = { 'w', 'u', 'b', 'r', 'g' };
 
-            foreach (string color in colors)
+            foreach (char color in colors)
             {
                 if (manaCost.Contains(color))
                 {
@@ -46,7 +46,7 @@
 
         public string GetDisplayString()
         {
-            return $"1 {Name}";
+            return $"{Name} - {Color} ({ColorCount}) - {Face} {Layout}";
         }
     }
 }
