@@ -8,17 +8,12 @@
 		"DeleteBadFaces": false,
 		"IllegalSetCodes": [ "htr", "cmb" ],
 		"UseDebugCardSubset": true,
-		"DebugCards": [ "Alive // Well", "Fae of Wishes // Granted", "Find // Finality", "Hide // Seek", "Road // Ruin", "Night // Day", "Fast // Furious", "Order of Midnight // Alter Fate", "Animating Faerie" ],
+		"DebugCards": [ "Alive // Well", "Fae of Wishes // Granted", "Find // Finality", "Hide // Seek", "Road // Ruin", "Night // Day", "Fast // Furious" ],
 		"ManualArtistOverrides": [
 			{
 				"card": "Fae of Wishes // Granted",
 				"face": "Back",
 				"artist": "Wylie Beckert"
-			},
-			{
-				"card": "Order of Midnight // Alter Fate",
-				"face": "",
-				"artist": "Seb McKinnon"
 			},
 			{
 				"card": "Hide // Seek",
@@ -29,21 +24,6 @@
 				"card": "Hide // Seek",
 				"face": "Back",
 				"artist": "Zoltan Boros & Gabor Szikszai"
-			},
-			{
-				"card": "Granted",
-				"face": "Back",
-				"artist": "Wylie Beckert"
-			},
-			{
-				"card": "",
-				"face": "Back",
-				"artist": "Aaron Miller"
-			},
-			{
-				"card": "Ardenvale Tactician // Dizzying Swoop",
-				"face": "",
-				"artist": ""
 			}
 		]
 	}

@@ -64,13 +64,13 @@
             switch (color)
             {
                 case "UG":
-                    Logger.Debug($"Correcting color of {DisplayName} from UG to GU.");
+                    Logger.Debug($"Correcting color of '{DisplayName}' from UG to GU.");
                     return "GU";
                 case "WG":
-                    Logger.Debug($"Correcting color of {DisplayName} from WG to GW.");
+                    Logger.Debug($"Correcting color of '{DisplayName}' from WG to GW.");
                     return "GW";
                 case "WR":
-                    Logger.Debug($"Correcting color of {DisplayName} from WR to RW.");
+                    Logger.Debug($"Correcting color of '{DisplayName}' from WR to RW.");
                     return "RW";
                 default: 
                     return color;
@@ -78,7 +78,7 @@
         }
         public void CorrectArtist(string newArtist)
         {
-            Logger.Debug($"Manually correcting artist of {DisplayName} from {Artist} to {newArtist} using config data.");
+            Logger.Debug($"Manually correcting artist of '{DisplayName}' from '{Artist}' to '{newArtist}'.");
             manualArtist = true;
             Artist = newArtist;
         }
