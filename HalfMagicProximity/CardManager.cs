@@ -4,8 +4,7 @@ namespace HalfMagicProximity
 {
     public class CardManager
     {
-        // ARGTODO: Remove once actual card storage is implemented
-        private int cardCount = 0;
+        public List<CardData> Cards { get; } = new List<CardData>();
 
         public void ParseJson(string jsonPath)
         {
@@ -27,11 +26,11 @@ namespace HalfMagicProximity
                     JsonElement node = root[i];
 
                     // Filter cards not in the Adventure or Split layout
-                    string layout = GetProperty(node, CardProperty.Layout);
+                    string layout = GetCardProperty(node, CardProperty.Layout);
                     if (layout != "adventure" && layout != "split") continue;
 
                     // Filter out non black bordered cards
-                    if (GetProperty(node, CardProperty.BorderColor) != "black") continue;
+                    if (GetCardProperty(node, CardProperty.BorderColor) != "black") continue;
 
                     // Filter out cards from banned sets
                     string[] bannedSetCodes =
@@ -42,7 +41,7 @@ namespace HalfMagicProximity
                     bool illegalSetCode = false;
                     foreach (string bannedCode in bannedSetCodes)
                     {
-                        if (GetProperty(node, CardProperty.SetCode).Contains(bannedCode))
+                        if (GetCardProperty(node, CardProperty.SetCode).Contains(bannedCode))
                         {
                             illegalSetCode = true;
                             break;
@@ -55,21 +54,55 @@ namespace HalfMagicProximity
                 }
             }
 
-            if (cardCount == 0)
+            if (Cards.Count == 0)
                 Logger.Error("No legal cards found!");
             else
-                Logger.Info($"There are {cardCount} legal cards.");
+                Logger.Info($"There are {Cards.Count} legal cards.");
         }
 
         private void AddCard(JsonElement jsonCard)
         {
-            // ARGTODO: Pull relevant card data from JSON
-            cardCount++;
-            Logger.Debug($"{GetProperty(jsonCard, CardProperty.Name)} is legal.");
+            string name = GetCardProperty(jsonCard, CardProperty.Name);
+            CardLayout layout = GetCardLayout(GetCardProperty(jsonCard, CardProperty.Layout));
+
+            JsonElement jsonFaces = jsonCard.GetProperty("card_faces");
+
+            for (int i = 0; i < jsonFaces.GetArrayLength(); i++)
+            {
+                CardFace face = (i == 0 ? CardFace.Front : CardFace.Back);
+                string artist = GetCardProperty(jsonFaces[i], CardProperty.Artist);
+
+                CardData card = new CardData(
+                    name,
+                    GetCardProperty(jsonFaces[i], CardProperty.ManaCost),
+                    ArtFileName(name, face, artist),
+                    artist,
+                    face,
+                    layout);
+
+                Cards.Add(card);
+                Logger.Debug($"Added {card.GetDisplayString()}");
+            }
+        }
+
+        private string ArtFileName(string name, CardFace face, string artist)
+        {
+            // ARGTODO: Pull from config? Not sure if this ever changes
+            const string ART_FILE_EXTENSION = ".jpg";
+
+            if (face == CardFace.Front)
+            {
+                return $"{name.Replace("/", "")} ({artist}){ART_FILE_EXTENSION}";
+            }
+            else
+            {
+                string[] nameSubstrings = name.Split('/');
+                return nameSubstrings[nameSubstrings.Length - 1].Replace(" ", "").ToLower() + ART_FILE_EXTENSION;
+            }
         }
 
         // Extract the value of a json element's property as a string
-        private string GetProperty(JsonElement element, CardProperty property)
+        private string GetCardProperty(JsonElement element, CardProperty property)
         {
             string stringProperty = element.GetProperty(PropertyString(property)).ToString();
 
@@ -103,6 +136,18 @@ namespace HalfMagicProximity
                 default:
                     Logger.Error($"Tried to access a card property that doesn't exist: {property}");
                     return "";
+            }
+        }
+
+        private CardLayout GetCardLayout(string layout)
+        {
+            switch (layout)
+            {
+                case "split": return CardLayout.Split;
+                case "adventure": return CardLayout.Adventure;
+                default:
+                    Logger.Error($"Card is missing its layout!");
+                    return CardLayout.None;
             }
         }
     }
