@@ -33,14 +33,9 @@ namespace HalfMagicProximity
                         // Filter out non black bordered cards
                         if (GetCardProperty(node, CardProperty.BorderColor) != "black") continue;
 
-                        // Filter out cards from banned sets
-                        string[] bannedSetCodes =
-                        {
-                        "cmb", // Playtest Cards
-                        "htr", // Heroes of the Realm
-                    };
+                        // Filter out cards from illegal sets                        
                         bool illegalSetCode = false;
-                        foreach (string bannedCode in bannedSetCodes)
+                        foreach (string bannedCode in ConfigManager.IllegalSetCodes)
                         {
                             if (GetCardProperty(node, CardProperty.SetCode).Contains(bannedCode))
                             {
@@ -101,17 +96,14 @@ namespace HalfMagicProximity
 
         private string ArtFileName(string name, CardFace face, string artist)
         {
-            // ARGTODO: Pull from config? Not sure if this ever changes
-            const string ART_FILE_EXTENSION = ".jpg";
-
             if (face == CardFace.Front)
             {
-                return $"{name.Replace("/", "")} ({artist}){ART_FILE_EXTENSION}";
+                return $"{name.Replace("/", "")} ({artist}){ConfigManager.ArtFileExtension}";
             }
             else
             {
                 string[] nameSubstrings = name.Split('/');
-                return nameSubstrings[nameSubstrings.Length - 1].Replace(" ", "").ToLower() + ART_FILE_EXTENSION;
+                return nameSubstrings[nameSubstrings.Length - 1].Replace(" ", "").ToLower() + ConfigManager.ArtFileExtension;
             }
         }
 

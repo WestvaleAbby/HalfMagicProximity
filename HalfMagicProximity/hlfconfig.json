@@ -2,6 +2,10 @@
 	"hlfOptions": {
 		"IsDebugEnabled": true,
 		"ScryfallPath": "D:\\Personal Files\\Docs\\Magic\\HalfMagic\\VS App\\oracle-cards-20220423210218.json",
-		"ProximityDirectory": "D:\\Personal Files\\Docs\\Magic\\HalfMagic\\VS App\\Proximity"
+		"ProximityDirectory": "D:\\Personal Files\\Docs\\Magic\\HalfMagic\\VS App\\Proximity",
+		"ArtFileExtension": ".jpg",
+		"ProxyRarityOverride": "",
+		"DeleteBadFaces": false,
+		"IllegalSetCodes": [ "htr", "cmb" ]
 	}
 }

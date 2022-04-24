@@ -2,9 +2,6 @@
 {
     internal class App
     {
-        // ARGTODO: Pull from config
-        const string SCRYFALL_PATH = "D:\\Personal Files\\Docs\\Magic\\HalfMagic\\VS App\\oracle-cards-20220423210218.json";
-
         static void Main(string[] args)
         {
             ConfigManager.Init();
@@ -13,7 +10,7 @@
             {
                 CardManager cardManager = new CardManager();
 
-                cardManager.ParseJson(SCRYFALL_PATH);
+                cardManager.ParseJson(ConfigManager.ScryfallPath);
             }
             else
             {
