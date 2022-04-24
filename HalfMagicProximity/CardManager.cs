@@ -54,10 +54,15 @@ namespace HalfMagicProximity
                         AddCard(node);
                     }
                 }
+
+                if (Cards.Count == 0)
+                    Logger.Error("No legal cards found!");
+                else
+                    Logger.Info($"There are {Cards.Count} legal cards.");
             }
             catch (FileNotFoundException e)
             {
-                Logger.Error($"JSON file at {e.FileName} not found: {e.Message}");
+                Logger.Error($"JSON file not found: {e.Message}");
             }
             catch (JsonException e)
             {
@@ -67,11 +72,6 @@ namespace HalfMagicProximity
             {
                 Logger.Error($"Error parsing JSON: {e.Message}");
             }
-
-            if (Cards.Count == 0)
-                Logger.Error("No legal cards found!");
-            else
-                Logger.Info($"There are {Cards.Count} legal cards.");
         }
 
         private void AddCard(JsonElement jsonCard)
