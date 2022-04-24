@@ -85,10 +85,11 @@ namespace HalfMagicProximity
             }
         }
 
-        private const string ART_FILE_EXTENSION = ".jpg";
-
         private string ArtFileName(string name, CardFace face, string artist)
         {
+            // ARGTODO: Pull from config? Not sure if this ever changes
+            const string ART_FILE_EXTENSION = ".jpg";
+
             if (face == CardFace.Front)
             {
                 return $"{name.Replace("/", "")} ({artist}){ART_FILE_EXTENSION}";

@@ -15,6 +15,7 @@
 
         public CardData(string name, string manaCost, string art, string artist, CardFace face, CardLayout layout)
         {
+            // ARGTODO: These should probably throw exceptions
             if (string.IsNullOrEmpty(name)) Logger.Error("Card object created with no name!");
             if (string.IsNullOrEmpty(manaCost)) Logger.Error("Card object created with no manaCost!");
             if (string.IsNullOrEmpty(art)) Logger.Error("Card object created with no art file name!");

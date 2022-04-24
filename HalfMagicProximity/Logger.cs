@@ -43,7 +43,7 @@
 
             EnableSeverityColors(severity);
 
-            Console.WriteLine($"{dateTimeStamp}|{severity, -5}|{message}");
+            Console.WriteLine($"{dateTimeStamp}|{severity}|{message}");
             
             // ARGTODO: Output logging message to a log file
 
