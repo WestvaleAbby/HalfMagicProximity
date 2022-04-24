@@ -8,56 +8,70 @@ namespace HalfMagicProximity
 
         public void ParseJson(string jsonPath)
         {
-            // ARGTODO: Dummy proofing?
-            using (Stream jsonStream = new FileStream(jsonPath, FileMode.Open, FileAccess.Read))
-            using (JsonDocument jsonDoc = JsonDocument.Parse(jsonStream))
+            try
             {
-                JsonElement root = jsonDoc.RootElement;
-
-                if (root.GetArrayLength() == 0)
+                using (Stream jsonStream = new FileStream(jsonPath, FileMode.Open, FileAccess.Read))
+                using (JsonDocument jsonDoc = JsonDocument.Parse(jsonStream))
                 {
-                    Logger.Error($"No cards found in the Scryfall JSON: {jsonPath}");
-                    return;
-                }
+                    JsonElement root = jsonDoc.RootElement;
 
-                Logger.Debug($"Filtering {root.GetArrayLength()} cards.");
-                for (int i = 0; i < root.GetArrayLength(); i++)
-                {
-                    JsonElement node = root[i];
-
-                    // Filter cards not in the Adventure or Split layout
-                    string layout = GetCardProperty(node, CardProperty.Layout);
-                    if (layout != "adventure" && layout != "split") continue;
-
-                    // Filter out non black bordered cards
-                    if (GetCardProperty(node, CardProperty.BorderColor) != "black") continue;
-
-                    // Filter out cards from banned sets
-                    string[] bannedSetCodes =
+                    if (root.GetArrayLength() == 0)
                     {
+                        Logger.Error($"No cards found in the Scryfall JSON: {jsonPath}");
+                        return;
+                    }
+
+                    Logger.Debug($"Filtering {root.GetArrayLength()} cards.");
+                    for (int i = 0; i < root.GetArrayLength(); i++)
+                    {
+                        JsonElement node = root[i];
+
+                        // Filter cards not in the Adventure or Split layout
+                        string layout = GetCardProperty(node, CardProperty.Layout);
+                        if (layout != "adventure" && layout != "split") continue;
+
+                        // Filter out non black bordered cards
+                        if (GetCardProperty(node, CardProperty.BorderColor) != "black") continue;
+
+                        // Filter out cards from banned sets
+                        string[] bannedSetCodes =
+                        {
                         "cmb", // Playtest Cards
                         "htr", // Heroes of the Realm
                     };
-                    bool illegalSetCode = false;
-                    foreach (string bannedCode in bannedSetCodes)
-                    {
-                        if (GetCardProperty(node, CardProperty.SetCode).Contains(bannedCode))
+                        bool illegalSetCode = false;
+                        foreach (string bannedCode in bannedSetCodes)
                         {
-                            illegalSetCode = true;
-                            break;
+                            if (GetCardProperty(node, CardProperty.SetCode).Contains(bannedCode))
+                            {
+                                illegalSetCode = true;
+                                break;
+                            }
                         }
+                        if (illegalSetCode) continue;
+
+                        // This card is legal, add it to the list
+                        AddCard(node);
                     }
-                    if (illegalSetCode) continue;
-
-                    // This card is legal, add it to the list
-                    AddCard(node);
                 }
-            }
 
-            if (Cards.Count == 0)
-                Logger.Error("No legal cards found!");
-            else
-                Logger.Info($"There are {Cards.Count} legal cards.");
+                if (Cards.Count == 0)
+                    Logger.Error("No legal cards found!");
+                else
+                    Logger.Info($"There are {Cards.Count} legal cards.");
+            }
+            catch (FileNotFoundException e)
+            {
+                Logger.Error($"JSON file not found: {e.Message}");
+            }
+            catch (JsonException e)
+            {
+                Logger.Error($"JSON Exception: {e.Message}");
+            }
+            catch (Exception e)
+            {
+                Logger.Error($"Error parsing JSON: {e.Message}");
+            }
         }
 
         private void AddCard(JsonElement jsonCard)
