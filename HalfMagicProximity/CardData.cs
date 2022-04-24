@@ -12,6 +12,10 @@
         public string Artist { get; private set; }
         public CardFace Face { get; private set; }
         public CardLayout Layout { get; private set; }
+        public CardData OtherFace { private get; set; }
+
+        public bool NeedsColorOverride => Color != OtherFace.Color;
+        public bool NeedsArtistOverride => Artist != OtherFace.Artist;
 
         public CardData(string name, string manaCost, string art, string artist, CardFace face, CardLayout layout)
         {
@@ -36,9 +40,9 @@
         /// <param name="manaCost"> The card's mana cost as a string</param>
         private void GetColorData(string manaCost)
         {
-            manaCost = manaCost.ToLower();
+            manaCost = manaCost.ToUpper();
 
-            char[] colors = { 'w', 'u', 'b', 'r', 'g' };
+            char[] colors = { 'W', 'U', 'B', 'R', 'G' };
 
             foreach (char color in colors)
             {
@@ -48,12 +52,24 @@
                 }
             }
 
+            Color = CorrectColorOrder(Color);
+
             ColorCount = Color.Length;
         }
 
-        public string GetDisplayString()
+        private string CorrectColorOrder(string color)
         {
-            return $"{Name} ({Layout} {Face})\n - {Color} ({ColorCount} color{(ColorCount > 1 ? "s" : "")})\n - Art File: {ArtFileName}\n - Artist: {Artist}";
+            // Some color pairs need to be reordered in order for proximity to recognize them properly
+            switch (color)
+            {
+                case "UG": return "GU";
+                case "WG": return "GW";
+                case "WR": return "RW";
+                default: return color;
+            }
         }
+
+        public string DisplayName => $"{Name} ({Layout} {Face})";
+        public string DisplayInfo => $"{DisplayName} | {Color} ({ColorCount} colors) | Artist: {Artist} | Art: '{ArtFileName}'";
     }
 }

@@ -76,25 +76,33 @@ namespace HalfMagicProximity
 
             JsonElement jsonFaces = jsonCard.GetProperty("card_faces");
 
+            CardData[] cardFaces = new CardData[2];
+
             for (int i = 0; i < jsonFaces.GetArrayLength(); i++)
             {
                 CardFace face = (i == 0 ? CardFace.Front : CardFace.Back);
                 string artist = GetCardProperty(jsonFaces[i], CardProperty.Artist);
 
-                CardData card = new CardData(
+                cardFaces[i] = new CardData(
                     name,
                     GetCardProperty(jsonFaces[i], CardProperty.ManaCost),
-                    ArtFileName(name, face, artist),
+                    GenerateArtFileName(name, face, artist),
                     artist,
                     face,
                     layout);
 
-                Cards.Add(card);
-                Logger.Debug($"Added {card.GetDisplayString()}");
+                Cards.Add(cardFaces[i]);
+                Logger.Debug($"Added {cardFaces[i].DisplayInfo}");
             }
+
+            cardFaces[0].OtherFace = cardFaces[1];
+            cardFaces[1].OtherFace = cardFaces[0];
+
+            if (cardFaces[0].NeedsColorOverride) Logger.Debug($"{cardFaces[0].Name} needs a color override: Front is {cardFaces[0].Color}, Back is {cardFaces[1].Color}.");
+            if (cardFaces[0].NeedsArtistOverride) Logger.Debug($"{cardFaces[0].Name} needs an artist override: Front is '{cardFaces[0].Artist}', Back is '{cardFaces[1].Artist}'.");
         }
 
-        private string ArtFileName(string name, CardFace face, string artist)
+        private string GenerateArtFileName(string name, CardFace face, string artist)
         {
             if (face == CardFace.Front)
             {
