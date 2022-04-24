@@ -1,12 +1,52 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace HalfMagicProximity
+﻿namespace HalfMagicProximity
 {
-    internal class CardData
+    public enum CardFace { Front, Back, };
+    public enum CardLayout { Split, Adventure, };
+
+    public class CardData
     {
+        public string Name { get; private set; }
+        public string Color { get; private set; }
+        public int ColorCount { get; private set; }
+        public CardFace Face { get; private set; }
+        public CardLayout Layout { get; private set; }
+        public string ArtPath { get; private set; }
+
+        public CardData(string name, string manaCost, CardFace face, CardLayout layout)
+        {
+            if (string.IsNullOrEmpty(name)) Logger.Error("Card object created with no name");
+            if (string.IsNullOrEmpty(manaCost)) Logger.Error("Card object created with no manaCost");
+
+            Name = name;
+            GetColorData(manaCost);
+            Face = face;
+            Layout = layout;
+        }
+
+        /// <summary>
+        /// Parses the mana cost of a card to determine its colors and color count
+        /// </summary>
+        /// <param name="manaCost"> The card's mana cost as a string</param>
+        private void GetColorData(string manaCost)
+        {
+            manaCost = manaCost.ToLower();
+
+            char[] colors = { 'w', 'u', 'b', 'r', 'g' };
+
+            foreach (char color in colors)
+            {
+                if (manaCost.Contains(color))
+                {
+                    Color += color;
+                }
+            }
+
+            ColorCount = colors.Length;
+        }
+
+        public string GetDisplayString()
+        {
+            return $"{Name} - {Color} ({ColorCount}) - {Face} {Layout}";
+        }
     }
 }
