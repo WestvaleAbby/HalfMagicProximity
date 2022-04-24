@@ -72,6 +72,10 @@ namespace HalfMagicProximity
         private void AddCard(JsonElement jsonCard)
         {
             string name = GetCardProperty(jsonCard, CardProperty.Name);
+
+            // Only add cards in the debug card list if we're using that subset of cards
+            if (ConfigManager.UseDebugCardSubset && !ConfigManager.DebugCards.Contains(name.ToLower())) return;
+
             CardLayout layout = GetCardLayout(GetCardProperty(jsonCard, CardProperty.Layout));
 
             JsonElement jsonFaces = jsonCard.GetProperty("card_faces");
@@ -91,6 +95,11 @@ namespace HalfMagicProximity
                     face,
                     layout);
 
+                // Check for manual artist overrides and implement them
+                ManualArtistOverride manualArtistOverride = CheckForManualArtistOverride(name, face);
+                if (manualArtistOverride != null && face == manualArtistOverride.CardFace)
+                    cardFaces[i].CorrectArtist(manualArtistOverride.Artist);
+
                 Cards.Add(cardFaces[i]);
                 Logger.Debug($"Added {cardFaces[i].DisplayInfo}");
             }
@@ -98,15 +107,37 @@ namespace HalfMagicProximity
             cardFaces[0].OtherFace = cardFaces[1];
             cardFaces[1].OtherFace = cardFaces[0];
 
-            if (cardFaces[0].NeedsColorOverride) Logger.Debug($"{cardFaces[0].Name} needs a color override: Front is {cardFaces[0].Color}, Back is {cardFaces[1].Color}.");
-            if (cardFaces[0].NeedsArtistOverride) Logger.Debug($"{cardFaces[0].Name} needs an artist override: Front is '{cardFaces[0].Artist}', Back is '{cardFaces[1].Artist}'.");
+            if (cardFaces[0].NeedsColorOverride) 
+                Logger.Debug($"'{cardFaces[0].Name}' needs a color override: Front is {cardFaces[0].Color}, Back is {cardFaces[1].Color}.");
+
+            if (cardFaces[0].NeedsArtistOverride)
+            {
+                string frontArtist = cardFaces[0].Artist;
+                string backArtist = cardFaces[1].Artist;
+
+                if (frontArtist == backArtist)
+                    Logger.Debug($"'{cardFaces[0].Name}' needs an artist override since it was manually corrected.");
+                else
+                    Logger.Debug($"'{cardFaces[0].Name}' needs an artist override: Front is '{cardFaces[0].Artist}', Back is '{cardFaces[1].Artist}'.");
+            }
+        }
+
+        private ManualArtistOverride CheckForManualArtistOverride(string name, CardFace face)
+        {
+            foreach(ManualArtistOverride artistOverride in ConfigManager.ManualArtistOverrides)
+            {
+                if (artistOverride.CardName == name.ToLower() && artistOverride.CardFace == face) 
+                    return artistOverride;
+            }
+
+            return null;
         }
 
         private string GenerateArtFileName(string name, CardFace face, string artist)
         {
             if (face == CardFace.Front)
             {
-                return $"{name.Replace("/", "")} ({artist}){ConfigManager.ArtFileExtension}";
+                return name.Replace("/", "") + ConfigManager.ArtFileExtension;
             }
             else
             {
@@ -120,7 +151,8 @@ namespace HalfMagicProximity
         {
             string stringProperty = element.GetProperty(PropertyString(property)).ToString();
 
-            if (string.IsNullOrEmpty(stringProperty)) Logger.Error($"Card JSON missing {property} value.");
+            if (string.IsNullOrEmpty(stringProperty)) 
+                Logger.Error($"Card JSON missing {property} value.");
 
             return stringProperty;
         }

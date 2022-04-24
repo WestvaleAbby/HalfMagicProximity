@@ -1,11 +1,30 @@
 {
 	"hlfOptions": {
-		"IsDebugEnabled": false,
+		"IsDebugEnabled": true,
 		"ScryfallPath": "D:\\Personal Files\\Docs\\Magic\\HalfMagic\\VS App\\oracle-cards-20220423210218.json",
 		"ProximityDirectory": "D:\\Personal Files\\Docs\\Magic\\HalfMagic\\VS App\\Proximity",
 		"ArtFileExtension": ".jpg",
 		"ProxyRarityOverride": "uncommon",
 		"DeleteBadFaces": false,
-		"IllegalSetCodes": [ "htr", "cmb" ]
+		"IllegalSetCodes": [ "htr", "cmb" ],
+		"UseDebugCardSubset": true,
+		"DebugCards": [ "Alive // Well", "Fae of Wishes // Granted", "Find // Finality", "Hide // Seek", "Road // Ruin", "Night // Day", "Fast // Furious" ],
+		"ManualArtistOverrides": [
+			{
+				"card": "Fae of Wishes // Granted",
+				"face": "Back",
+				"artist": "Wylie Beckert"
+			},
+			{
+				"card": "Hide // Seek",
+				"face": "Front",
+				"artist": "Zoltan Boros & Gabor Szikszai"
+			},
+			{
+				"card": "Hide // Seek",
+				"face": "Back",
+				"artist": "Zoltan Boros & Gabor Szikszai"
+			}
+		]
 	}
 }

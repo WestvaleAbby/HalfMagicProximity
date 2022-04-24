@@ -24,8 +24,6 @@ namespace HalfMagicProximity
             // Run proximity
         }
 
-        private string[] testCards = { "Alive // Well", "Fae of Wishes // Granted", "Find // Finality", "Hide // Seek", "Road // Ruin", "Night // Day" };
-
         private void GenerateDeckFiles()
         {
             // Create or open and clear file
@@ -40,10 +38,6 @@ namespace HalfMagicProximity
                     // Add cards to file
                     foreach (CardData card in allCards)
                     {
-                        // Skip most cards except for a small selection of test cards if we're debugging.
-                        // ARGTODO: This should probably not be here long term
-                        if (Logger.IsDebugEnabled && !testCards.Contains(card.Name)) continue;
-
                         string cardString = GenerateCardString(card);
                         byte[] cardBytes = new UTF8Encoding(true).GetBytes(cardString + Environment.NewLine);
 
