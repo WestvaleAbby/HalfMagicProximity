@@ -4,11 +4,11 @@
     {
         // ARGTODO: Pull from config
         const string SCRYFALL_PATH = "D:\\Personal Files\\Docs\\Magic\\HLF Proximity\\oracle-cards-20220423210218.json";
+        const bool DEBUG = true;
 
         static void Main(string[] args)
         {
-            // ARGTODO: Pull from config
-            Logger.IsDebugEnabled = true;
+            Logger.IsDebugEnabled = DEBUG;
 
             CardManager cardManager = new CardManager();
 
