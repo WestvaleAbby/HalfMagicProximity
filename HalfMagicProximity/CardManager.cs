@@ -35,8 +35,9 @@ namespace HalfMagicProximity
 
                         // Filter out various duplicates
                         if (GetBooleanCardProperty(node, CardProperty.Promo)) continue;
-                        if (GetBooleanCardProperty(node, CardProperty.Variation)) continue;
 
+                        // Filter out showcases and the like to avoid duplicates
+                        // ARGTODO: This may not always work, depending on how future cards are released
                         try
                         {
                             JsonElement frameEffects = node.GetProperty(PropertyString(CardProperty.FrameEffects));
@@ -47,7 +48,6 @@ namespace HalfMagicProximity
                         catch
                         {
                             // Card does not have frame effects. No need to act.
-                            ;
                         }
 
                         // Filter out non black bordered cards
@@ -216,7 +216,6 @@ namespace HalfMagicProximity
             Reprint,
             SetCode,
             Watermark,
-            Variation,
         };
 
         // Converts CardProperty enum to the string found in the scryfall json
@@ -235,7 +234,6 @@ namespace HalfMagicProximity
                 case CardProperty.Reprint: return "reprint";
                 case CardProperty.SetCode: return "set";
                 case CardProperty.Watermark: return "watermark";
-                case CardProperty.Variation: return "variation";
                 default:
                     Logger.Error($"Tried to access a card property that doesn't exist: {property}");
                     return "";
