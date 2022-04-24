@@ -90,7 +90,7 @@ namespace HalfMagicProximity
                     if (DeleteBadFaces)
                         Logger.Info($"Bad proxy faces will be deleted once all proxies have been rendered.");
                     else
-                        Logger.Info($"Bad proxy faces will not be automatically deleted.");
+                        Logger.Warn($"Bad proxy faces will not be automatically deleted.");
 
                     IllegalSetCodes.Clear();
                     JsonElement illegalSetCodeElement = configOptions.GetProperty("IllegalSetCodes");
