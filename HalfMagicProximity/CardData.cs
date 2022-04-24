@@ -1,6 +1,7 @@
 ﻿namespace HalfMagicProximity
 {
     public enum CardFace { Front, Back, };
+    public enum CardLayout { Split, Adventure, None};
 
     public class CardData
     {
@@ -10,19 +11,22 @@
         public string ArtFileName { get; private set; }
         public string Artist { get; private set; }
         public CardFace Face { get; private set; }
+        public CardLayout Layout { get; private set; }
 
-        public CardData(string name, string manaCost, string art, string artist, CardFace face)
+        public CardData(string name, string manaCost, string art, string artist, CardFace face, CardLayout layout)
         {
             if (string.IsNullOrEmpty(name)) Logger.Error("Card object created with no name!");
             if (string.IsNullOrEmpty(manaCost)) Logger.Error("Card object created with no manaCost!");
             if (string.IsNullOrEmpty(art)) Logger.Error("Card object created with no art file name!");
             if (string.IsNullOrEmpty(artist)) Logger.Error("Card object created with no artist name!");
+            if (layout == CardLayout.None) Logger.Error("Card object created with no layout!");
 
             Name = name;
             GetColorData(manaCost);
-            Face = face;
             ArtFileName = art;
             Artist = artist;
+            Face = face;
+            Layout = layout;
         }
 
         /// <summary>
@@ -48,7 +52,7 @@
 
         public string GetDisplayString()
         {
-            return $"{Name} ({Face})\n - {Color} ({ColorCount} color{(ColorCount > 1 ? "s" : "")})\n - Art File: {ArtFileName}\n - Artist: {Artist}";
+            return $"{Name} ({Layout} {Face})\n - {Color} ({ColorCount} color{(ColorCount > 1 ? "s" : "")})\n - Art File: {ArtFileName}\n - Artist: {Artist}";
         }
     }
 }

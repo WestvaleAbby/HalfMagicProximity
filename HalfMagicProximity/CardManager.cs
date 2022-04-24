@@ -63,6 +63,7 @@ namespace HalfMagicProximity
         private void AddCard(JsonElement jsonCard)
         {
             string name = GetCardProperty(jsonCard, CardProperty.Name);
+            CardLayout layout = GetCardLayout(GetCardProperty(jsonCard, CardProperty.Layout));
 
             JsonElement jsonFaces = jsonCard.GetProperty("card_faces");
 
@@ -76,7 +77,8 @@ namespace HalfMagicProximity
                     GetCardProperty(jsonFaces[i], CardProperty.ManaCost),
                     ArtFileName(name, face, artist),
                     artist,
-                    face);
+                    face,
+                    layout);
 
                 Cards.Add(card);
                 Logger.Debug($"Added {card.GetDisplayString()}");
@@ -133,6 +135,18 @@ namespace HalfMagicProximity
                 default:
                     Logger.Error($"Tried to access a card property that doesn't exist: {property}");
                     return "";
+            }
+        }
+
+        private CardLayout GetCardLayout(string layout)
+        {
+            switch (layout)
+            {
+                case "split": return CardLayout.Split;
+                case "adventure": return CardLayout.Adventure;
+                default:
+                    Logger.Error($"Card is missing its layout!");
+                    return CardLayout.None;
             }
         }
     }
