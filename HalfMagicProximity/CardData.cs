@@ -16,11 +16,11 @@
         public CardData(string name, string manaCost, string art, string artist, CardFace face, CardLayout layout)
         {
             // ARGTODO: These should probably throw exceptions
-            if (string.IsNullOrEmpty(name)) Logger.Error("Card object created with no name!");
-            if (string.IsNullOrEmpty(manaCost)) Logger.Error("Card object created with no manaCost!");
-            if (string.IsNullOrEmpty(art)) Logger.Error("Card object created with no art file name!");
-            if (string.IsNullOrEmpty(artist)) Logger.Error("Card object created with no artist name!");
-            if (layout == CardLayout.None) Logger.Error("Card object created with no layout!");
+            if (string.IsNullOrEmpty(name)) Logger.Warn("Card object created with no name!");
+            if (string.IsNullOrEmpty(manaCost)) Logger.Warn("Card object created with no manaCost!");
+            if (string.IsNullOrEmpty(art)) Logger.Warn("Card object created with no art file name!");
+            if (string.IsNullOrEmpty(artist)) Logger.Warn("Card object created with no artist name!");
+            if (layout == CardLayout.None) Logger.Warn("Card object created with no layout!");
 
             Name = name;
             GetColorData(manaCost);
