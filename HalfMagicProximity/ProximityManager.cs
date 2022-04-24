@@ -79,6 +79,10 @@ namespace HalfMagicProximity
                 cardString += OverrideTemplate + "proximity.mtg.color_count:" + card.ColorCount;
             }
 
+            // Add watermark override if the card has one
+            if (card.NeedsWatermarkOverride)
+                cardString += OverrideTemplate + "watermark:" + card.Watermark;
+
             // Add artist override if faces have different artists
             if (card.NeedsArtistOverride)
                 cardString += OverrideTemplate + "artist:\"" + card.Artist + "\"";

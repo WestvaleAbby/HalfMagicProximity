@@ -14,13 +14,15 @@
         public CardFace Face { get; private set; }
         public CardLayout Layout { get; private set; }
         public CardData OtherFace { private get; set; }
+        public string Watermark { get; private set; }
 
         public bool NeedsColorOverride => Color != OtherFace.Color;
         public bool NeedsArtistOverride => Artist != OtherFace.Artist || manualArtist;
+        public bool NeedsWatermarkOverride => !string.IsNullOrEmpty(Watermark);
 
-        public CardData(string name, string manaCost, string art, string artist, CardFace face, CardLayout layout)
+        public CardData(string name, string manaCost, string art, string artist, CardFace face, CardLayout layout, string watermark)
         {
-            // ARGTODO: These should probably throw exceptions
+            // Don't need to check if watermark is empty, empty indicates no watermark
             if (string.IsNullOrEmpty(name)) Logger.Warn("Card object created with no name!");
             if (string.IsNullOrEmpty(manaCost)) Logger.Warn("Card object created with no manaCost!");
             if (string.IsNullOrEmpty(art)) Logger.Warn("Card object created with no art file name!");
@@ -33,6 +35,7 @@
             Artist = artist;
             Face = face;
             Layout = layout;
+            Watermark = watermark;
         }
 
         /// <summary>
