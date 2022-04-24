@@ -36,9 +36,17 @@ namespace HalfMagicProximity
                     if (string.IsNullOrEmpty(ProximityDirectory)) throw new Exception($"Path to Proximity Directory not found!");
                 }
             }
+            catch (FileNotFoundException e)
+            {
+                Logger.Error($"Config file not found: {e.Message}");
+            }
+            catch (JsonException e)
+            {
+                Logger.Error($"Config JSON Error: {e.Message}");
+            }
             catch (Exception e)
             {
-                Logger.Error("Config Error: " + e.Message);
+                Logger.Error($"Config Error: {e.Message}");
             }
         }
     }
