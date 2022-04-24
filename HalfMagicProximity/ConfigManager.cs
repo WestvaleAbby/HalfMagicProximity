@@ -122,8 +122,18 @@ namespace HalfMagicProximity
                         JsonElement debugCardElement = configOptions.GetProperty("DebugCards");
                         for (int i = 0; i < debugCardElement.GetArrayLength(); i++)
                         {
-                            DebugCards.Add(debugCardElement[i].ToString().ToLower());
-                            Logger.Info($"Added {DebugCards[i]} to list of debug cards.");
+                            string debugCard = debugCardElement[i].ToString().ToLower();
+
+                            if (!debugCard.Contains("//"))
+                            {
+                                Logger.Warn($"Debug card '{debugCard}' does not have '//'. Please double check that you have the full card name.");
+                            }
+                            else
+                            {
+                                DebugCards.Add(debugCard);
+                                Logger.Info($"Added '{DebugCards.Last()}' to list of debug cards.");
+                            }
+
                         }
                     }
                     else
@@ -147,27 +157,28 @@ namespace HalfMagicProximity
                         }
                         else if (!card.Contains("//"))
                         {
-                            Logger.Warn($"Artist override '{card}' does not have '//'. Double check that you have the full card name.");
-                        }
-
-                        // Determine whether the card is a front or back face. Default to front
-                        CardFace face = CardFace.Front;
-                        string faceString = cardElement.GetProperty("face").ToString().ToLower();
-                        if (faceString == "back")
-                            face = CardFace.Back;
-                        else if (faceString != "front")
-                            Logger.Warn($"Manual artist override for '{card}' has its face improperly specified. Defaulting to 'front'.");
-
-                        // Determine the artist name to use
-                        string artist = cardElement.GetProperty("artist").ToString().ToLower();
-                        if (string.IsNullOrEmpty(artist))
-                        {
-                            Logger.Error($"Skipping artist override with no artist name!");
+                            Logger.Warn($"Artist override '{card}' does not have '//'. Please double check that you have the full card name.");
                             continue;
                         }
 
+                        // Determine the artist name to use
+                        string artist = cardElement.GetProperty("artist").ToString();
+                        if (string.IsNullOrEmpty(artist))
+                        {
+                            Logger.Error($"Skipping artist override for '{card}' with no artist name!");
+                            continue;
+                        }
+
+                        // Determine whether the card is a front or back face. Default to back
+                        CardFace face = CardFace.Back;
+                        string faceString = cardElement.GetProperty("face").ToString().ToLower();
+                        if (faceString == "front")
+                            face = CardFace.Front;
+                        else if (faceString != "back")
+                            Logger.Warn($"Manual artist override for '{card}' has its face improperly specified. Defaulting to 'Back'.");
+
                         ManualArtistOverrides.Add(new ManualArtistOverride(card, face, artist));
-                        Logger.Info($"Added '{ManualArtistOverrides[i].CardName}' to list of artist overrides.");
+                        Logger.Info($"Added '{ManualArtistOverrides.Last().CardName}' to list of artist overrides.");
                     }
                 }
             }

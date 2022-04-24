@@ -10,12 +10,13 @@
         public int ColorCount { get; private set; }
         public string ArtFileName { get; private set; }
         public string Artist { get; private set; }
+        private bool manualArtist = false;
         public CardFace Face { get; private set; }
         public CardLayout Layout { get; private set; }
         public CardData OtherFace { private get; set; }
 
         public bool NeedsColorOverride => Color != OtherFace.Color;
-        public bool NeedsArtistOverride => Artist != OtherFace.Artist;
+        public bool NeedsArtistOverride => Artist != OtherFace.Artist || manualArtist;
 
         public CardData(string name, string manaCost, string art, string artist, CardFace face, CardLayout layout)
         {
@@ -62,11 +63,24 @@
             // Some color pairs need to be reordered in order for proximity to recognize them properly
             switch (color)
             {
-                case "UG": return "GU";
-                case "WG": return "GW";
-                case "WR": return "RW";
-                default: return color;
+                case "UG":
+                    Logger.Debug($"Correcting color of {DisplayName} from UG to GU.");
+                    return "GU";
+                case "WG":
+                    Logger.Debug($"Correcting color of {DisplayName} from WG to GW.");
+                    return "GW";
+                case "WR":
+                    Logger.Debug($"Correcting color of {DisplayName} from WR to RW.");
+                    return "RW";
+                default: 
+                    return color;
             }
+        }
+        public void CorrectArtist(string newArtist)
+        {
+            Logger.Debug($"Manually correcting artist of {DisplayName} from {Artist} to {newArtist} using config data.");
+            manualArtist = true;
+            Artist = newArtist;
         }
 
         public string DisplayName => $"{Name} ({Layout} {Face})";

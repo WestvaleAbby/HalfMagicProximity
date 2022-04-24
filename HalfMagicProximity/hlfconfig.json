@@ -1,6 +1,6 @@
 {
 	"hlfOptions": {
-		"IsDebugEnabled": false,
+		"IsDebugEnabled": true,
 		"ScryfallPath": "D:\\Personal Files\\Docs\\Magic\\HalfMagic\\VS App\\oracle-cards-20220423210218.json",
 		"ProximityDirectory": "D:\\Personal Files\\Docs\\Magic\\HalfMagic\\VS App\\Proximity",
 		"ArtFileExtension": ".jpg",
@@ -8,17 +8,42 @@
 		"DeleteBadFaces": false,
 		"IllegalSetCodes": [ "htr", "cmb" ],
 		"UseDebugCardSubset": true,
-		"DebugCards": [ "Alive // Well", "Fae of Wishes // Granted", "Find // Finality", "Hide // Seek", "Road // Ruin", "Night // Day", "Fast // Furious", "Order of Midnight // Alter Fate" ],
+		"DebugCards": [ "Alive // Well", "Fae of Wishes // Granted", "Find // Finality", "Hide // Seek", "Road // Ruin", "Night // Day", "Fast // Furious", "Order of Midnight // Alter Fate", "Animating Faerie" ],
 		"ManualArtistOverrides": [
+			{
+				"card": "Fae of Wishes // Granted",
+				"face": "Back",
+				"artist": "Wylie Beckert"
+			},
+			{
+				"card": "Order of Midnight // Alter Fate",
+				"face": "",
+				"artist": "Seb McKinnon"
+			},
+			{
+				"card": "Hide // Seek",
+				"face": "Front",
+				"artist": "Zoltan Boros & Gabor Szikszai"
+			},
+			{
+				"card": "Hide // Seek",
+				"face": "Back",
+				"artist": "Zoltan Boros & Gabor Szikszai"
+			},
 			{
 				"card": "Granted",
 				"face": "Back",
 				"artist": "Wylie Beckert"
 			},
 			{
-				"card": "Order of Midnight // Alter Fate",
+				"card": "",
 				"face": "Back",
-				"artist": "Seb McKinnon"
+				"artist": "Aaron Miller"
+			},
+			{
+				"card": "Ardenvale Tactician // Dizzying Swoop",
+				"face": "",
+				"artist": ""
 			}
 		]
 	}
