@@ -108,10 +108,18 @@ namespace HalfMagicProximity
             cardFaces[1].OtherFace = cardFaces[0];
 
             if (cardFaces[0].NeedsColorOverride) 
-                Logger.Debug($"{cardFaces[0].Name} needs a color override: Front is {cardFaces[0].Color}, Back is {cardFaces[1].Color}.");
+                Logger.Debug($"'{cardFaces[0].Name}' needs a color override: Front is {cardFaces[0].Color}, Back is {cardFaces[1].Color}.");
 
             if (cardFaces[0].NeedsArtistOverride)
-                Logger.Debug($"{cardFaces[0].Name} needs an artist override: Front is '{cardFaces[0].Artist}', Back is '{cardFaces[1].Artist}'.");
+            {
+                string frontArtist = cardFaces[0].Artist;
+                string backArtist = cardFaces[1].Artist;
+
+                if (frontArtist == backArtist)
+                    Logger.Debug($"'{cardFaces[0].Name}' needs an artist override since it was manually corrected.");
+                else
+                    Logger.Debug($"'{cardFaces[0].Name}' needs an artist override: Front is '{cardFaces[0].Artist}', Back is '{cardFaces[1].Artist}'.");
+            }
         }
 
         private ManualArtistOverride CheckForManualArtistOverride(string name, CardFace face)
@@ -130,7 +138,6 @@ namespace HalfMagicProximity
             if (face == CardFace.Front)
             {
                 return name.Replace("/", "") + ConfigManager.ArtFileExtension;
-                //return $"{name.Replace("/", "")} ({artist}){ConfigManager.ArtFileExtension}";
             }
             else
             {
