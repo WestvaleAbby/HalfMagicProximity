@@ -12,6 +12,7 @@ namespace HalfMagicProximity
         private static string defaultArtFileExtension = ".jpg";
 
         public static string ProxyRarityOverride;
+        public static bool IsProxyRarityOverrided => !string.IsNullOrEmpty(ProxyRarityOverride);
         private static string[] validRarities = { "common", "uncommon", "rare", "mythic" };
 
         public static bool DeleteBadFaces;
