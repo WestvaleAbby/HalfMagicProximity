@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Text;
 
 namespace HalfMagicProximity
 {
@@ -28,14 +24,47 @@ namespace HalfMagicProximity
             // Run proximity
         }
 
+        private string[] testCards = { "Alive // Well", "Fae of Wishes // Granted", "Find // Finality", "Hide // Seek", "Road // Ruin", "Night // Day" };
+
         private void GenerateDeckFiles()
         {
             // Create or open and clear file
+            string deckPath = Path.Combine(ConfigManager.ProximityDirectory, "cards.txt");
 
-            // Add cards to file
-            foreach (var card in allCards)
+            try
             {
-                GenerateCardString(card);
+                int successfulCards = 0;
+
+                using (FileStream deckStream = File.Create(deckPath))
+                {
+                    // Add cards to file
+                    foreach (CardData card in allCards)
+                    {
+                        // Skip most cards except for a small selection of test cards if we're debugging.
+                        // ARGTODO: This should probably not be here long term
+                        if (Logger.IsDebugEnabled && !testCards.Contains(card.Name)) continue;
+
+                        string cardString = GenerateCardString(card);
+                        byte[] cardBytes = new UTF8Encoding(true).GetBytes(cardString + Environment.NewLine);
+
+                        // Write card string to the deck file
+                        deckStream.Write(cardBytes, 0, cardBytes.Length);
+                        successfulCards++;
+                    }
+                }
+
+                if (File.Exists(deckPath))
+                    Logger.Info($"Generated deck file with {successfulCards} at '{deckPath}'.");
+                else
+                    Logger.Error($"Unable to generate deck file at '{deckPath}'!");
+            }
+            catch (DirectoryNotFoundException e)
+            {
+                Logger.Error($"Unable to find Proximity directory '{ConfigManager.ProximityDirectory}'!");
+            }
+            catch (Exception e)
+            {
+                Logger.Error($"Error generating proximity deck file: {e.Message}");
             }
         }
 
@@ -63,7 +92,7 @@ namespace HalfMagicProximity
             // Front faces can automatically pull their art directly from the art folder or scryfall. Back faces need to be manually pointed to specific art crops
             if (card.Face == CardFace.Back)
             {
-                string artPath = Path.Combine(ConfigManager.ProximityDirectory, "art", "back", card.ArtFileName).Replace("\\", "/");
+                string artPath = Path.Combine(ConfigManager.ProximityDirectory, "art", "back", card.ArtFileName).Replace("\\", "/").Replace(" ", "%20");
 
                 cardString += OverrideTemplate + "image_uris.art_crop:\"\"file:///" + artPath + "\"\"";
             }
