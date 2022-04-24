@@ -13,7 +13,7 @@
         private const ConsoleColor INFO_COLOR = ConsoleColor.White;
         private const ConsoleColor WARN_COLOR = ConsoleColor.Magenta;
         private const ConsoleColor ERROR_COLOR = ConsoleColor.Red;
-        private const ConsoleColor DEBUG_COLOR = ConsoleColor.Gray;
+        private const ConsoleColor DEBUG_COLOR = ConsoleColor.DarkGray;
         private const ConsoleColor BACK_COLOR = ConsoleColor.Black;
 
         private static ConsoleColor storedForegroundColor;

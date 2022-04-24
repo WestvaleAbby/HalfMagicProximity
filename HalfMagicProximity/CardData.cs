@@ -13,7 +13,10 @@
         public string ArtPath { get; private set; }
 
         public CardData(string name, string manaCost, CardFace face, CardLayout layout)
-        {            
+        {
+            if (string.IsNullOrEmpty(name)) Logger.Error("Card object created with no name");
+            if (string.IsNullOrEmpty(manaCost)) Logger.Error("Card object created with no manaCost");
+
             Name = name;
             GetColorData(manaCost);
             Face = face;
@@ -39,6 +42,11 @@
             }
 
             ColorCount = colors.Length;
+        }
+
+        public string GetDisplayString()
+        {
+            return $"1 {Name}";
         }
     }
 }
