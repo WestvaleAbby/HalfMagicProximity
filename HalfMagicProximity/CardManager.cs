@@ -13,7 +13,7 @@ namespace HalfMagicProximity
                 // An array with all of the parsed card data
                 JsonElement scryfallData = jsonDoc.RootElement;
 
-                Console.WriteLine($"JSON Parsed. First card: {scryfallData[0].GetProperty("name")}");
+                Console.WriteLine($"JSON Parsed. Found {scryfallData.GetArrayLength()} cards.");
             }
         }
     }
