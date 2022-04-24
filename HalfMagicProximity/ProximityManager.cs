@@ -19,7 +19,6 @@ namespace HalfMagicProximity
         {
             Logger.Info("Beginning Proximity preparations.");
 
-            // Generate deck files
             GenerateDeckFiles();
 
             // Generate command string
@@ -50,16 +49,18 @@ namespace HalfMagicProximity
             if (ConfigManager.IsProxyRarityOverrided)
                 cardString += OverrideTemplate + "rarity:" + ConfigManager.ProxyRarityOverride;
 
-            // Add color override if faces have different colors
+            // Add color overrides if faces have different colors
             if (card.NeedsColorOverride)
             {
                 cardString += OverrideTemplate + "colors:[\"" + card.Color + "\"]";
                 cardString += OverrideTemplate + "proximity.mtg.color_count:" + card.ColorCount;
             }
 
+            // Add artist override if faces have different artists
             if (card.NeedsArtistOverride)
                 cardString += OverrideTemplate + "artist:\"" + card.Artist + "\"";
 
+            // Front faces can automatically pull their art directly from the art folder or scryfall. Back faces need to be manually pointed to specific art crops
             if (card.Face == CardFace.Back)
             {
                 string artPath = Path.Combine(ConfigManager.ProximityDirectory, "art", "back", card.ArtFileName).Replace("\\", "/");
