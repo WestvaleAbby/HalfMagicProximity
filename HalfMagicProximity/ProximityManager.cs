@@ -1,4 +1,5 @@
 ﻿using System.Text;
+using System.Diagnostics;
 
 namespace HalfMagicProximity
 {
@@ -6,9 +7,20 @@ namespace HalfMagicProximity
     {
         private List<CardData> allCards;
 
+        private const string BatFileName = "hlfproxies.bat";
+        private string batPath;
+        private const string ProximityJarName = "proximity-0.6.2.jar";
+        private string proximityPath;
+        private const string DeckFileName = "cards.txt";
+        private string deckPath;
+
         public ProximityManager(List<CardData> allCards)
         {
             this.allCards = allCards ?? throw new ArgumentNullException(nameof(allCards));
+
+            deckPath = Path.Combine(ConfigManager.ProximityDirectory, DeckFileName);
+            proximityPath = Path.Combine(ConfigManager.ProximityDirectory, ProximityJarName);
+            batPath = Path.Combine(ConfigManager.ProximityDirectory, BatFileName);
         }
 
         public void Run()
@@ -17,18 +29,19 @@ namespace HalfMagicProximity
 
             GenerateDeckFiles();
 
-            // Generate command string
-
-            // Verify that everything we need for proximity is present
-            
-            // Run proximity
+            if (VerifyProximityFiles())
+            {
+                Logger.Info("All necessary proximity files are present. Executing now.");
+                ExecuteProximityBatchFile();
+            }
+            else
+            {
+                Logger.Error($"Unable to run proximity. You may be able to run it manually using the following:\n - Deck File: {deckPath} \n - Batch File: {batPath}");
+            }
         }
 
         private void GenerateDeckFiles()
         {
-            // Create or open and clear file
-            string deckPath = Path.Combine(ConfigManager.ProximityDirectory, "cards.txt");
-
             try
             {
                 int successfulCards = 0;
@@ -63,7 +76,6 @@ namespace HalfMagicProximity
         }
 
         private const string OverrideTemplate = " --override=";
-
         private string GenerateCardString(CardData card)
         {
             string cardString = $"1 {card.Name}";
@@ -87,10 +99,10 @@ namespace HalfMagicProximity
             if (card.NeedsArtistOverride)
                 cardString += OverrideTemplate + "artist:\"" + card.Artist + "\"";
 
-            // Front faces can automatically pull their art directly from the art folder or scryfall. Back faces need to be manually pointed to specific art crops
-            if (card.Face == CardFace.Back)
+            // Back faces and split cards need manually overridden art
+            if (card.NeedsArtOverride)
             {
-                string artPath = Path.Combine(ConfigManager.ProximityDirectory, "art", "back", card.ArtFileName).Replace("\\", "/").Replace(" ", "%20");
+                string artPath = Path.Combine(ConfigManager.ProximityDirectory, "art", card.ArtFileName).Replace("\\", "/").Replace(" ", "%20");
 
                 cardString += OverrideTemplate + "image_uris.art_crop:\"\"file:///" + artPath + "\"\"";
             }
@@ -98,6 +110,98 @@ namespace HalfMagicProximity
             Logger.Debug(cardString);
 
             return cardString;
+        }
+
+        private bool VerifyProximityFiles()
+        {
+            // Check for the deck (that we presumably just made)
+            if (File.Exists(deckPath))
+            {
+                Logger.Info($"Deck file '{DeckFileName}' is present.");
+            }
+            else
+            {
+                Logger.Error($"Deck file not found: {deckPath}");
+                return false;
+            }
+
+            // Check for the proximity jar file
+            if (File.Exists(proximityPath))
+            {
+                Logger.Info($"Proximity file '{ProximityJarName}' is present.");
+            }
+            else
+            {
+                Logger.Error($"Proximity jar file not found: {proximityPath}");
+                return false;
+            }
+
+            // Check that the proximity batch file exists
+            if (File.Exists(batPath))
+            {
+                Logger.Info($"Batch file '{BatFileName}' is present.");
+            }
+            else
+            {
+                Logger.Warn($"Batch file not found. Recreating now.");
+
+                // If the batch file doesn't exist, try and recreate it since its contents are very light
+                CreateBatchFile();
+
+                if (File.Exists(batPath))
+                {
+                    Logger.Info($"Batch file '{BatFileName}' successfully recreated.");
+                }
+                else
+                {
+                    Logger.Error($"Unable to recreate batch file '{BatFileName}': {batPath}");
+
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
+        private void CreateBatchFile()
+        {
+            try
+            {
+                using (FileStream batchStream = File.Create(batPath))
+                {
+                    string templatePath = Path.Combine(ConfigManager.ProximityDirectory, "templates", "hlf.zip").Replace("\\", "\\\\");
+                    string batchString = $"java -jar \"{proximityPath}\" --template=\"{templatePath}\" --cards=\"{deckPath.Replace("\\", "\\\\")}\" --art_source=BEST --set_symbol=jmp --use_card_back=true";
+                    byte[] batchBytes = new UTF8Encoding(true).GetBytes(batchString);
+
+                    batchStream.Write(batchBytes, 0, batchBytes.Length);
+                }
+            }
+            catch (DirectoryNotFoundException e)
+            {
+                Logger.Error($"Unable to find Proximity directory '{ConfigManager.ProximityDirectory}'!");
+            }
+            catch (Exception e)
+            {
+                Logger.Error($"Error generating proximity batch file: {e.Message}");
+            }
+        }
+
+        private void ExecuteProximityBatchFile()
+        {
+            Process proximityProcess = new Process();
+            ProcessStartInfo startInfo = new ProcessStartInfo(batPath);
+            startInfo.RedirectStandardOutput = true;
+            startInfo.UseShellExecute = false;
+            proximityProcess.StartInfo = startInfo;
+            proximityProcess.OutputDataReceived += HandleProximityOutput;
+            proximityProcess.Start();
+            proximityProcess.BeginOutputReadLine();
+            proximityProcess.WaitForExit();
+        }
+
+        private void HandleProximityOutput(object sender, DataReceivedEventArgs args)
+        {
+            Logger.Proximity(args.Data);
         }
     }
 }

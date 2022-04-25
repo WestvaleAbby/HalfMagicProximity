@@ -105,13 +105,12 @@ namespace HalfMagicProximity
             for (int i = 0; i < jsonFaces.GetArrayLength(); i++)
             {
                 CardFace face = (i == 0 ? CardFace.Front : CardFace.Back);
-                string artist = GetCardProperty(jsonFaces[i], CardProperty.Artist);
 
                 cardFaces[i] = new CardData(
                     name,
                     GetCardProperty(jsonFaces[i], CardProperty.ManaCost),
-                    GenerateArtFileName(name, face, artist),
-                    artist,
+                    GenerateArtFileName(name, face),
+                    GetCardProperty(jsonFaces[i], CardProperty.Artist),
                     face,
                     layout,
                     GetCardProperty(jsonFaces[i], CardProperty.Watermark));
@@ -157,17 +156,12 @@ namespace HalfMagicProximity
             return null;
         }
 
-        private string GenerateArtFileName(string name, CardFace face, string artist)
+        private string GenerateArtFileName(string name, CardFace face)
         {
-            if (face == CardFace.Front)
-            {
-                return name.Replace("/", "") + ConfigManager.ArtFileExtension;
-            }
-            else
-            {
-                string[] nameSubstrings = name.Split('/');
-                return nameSubstrings[nameSubstrings.Length - 1].Replace(" ", "").ToLower() + ConfigManager.ArtFileExtension;
-            }
+            string[] nameSubstrings = name.Split('/');
+            int index = (face == CardFace.Front ? 0 : nameSubstrings.Length - 1);
+
+            return nameSubstrings[index].Replace(" ", "").ToLower() + ConfigManager.ArtFileExtension;
         }
 
         // Extract the value of a json element's property as a string
