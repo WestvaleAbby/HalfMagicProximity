@@ -6,7 +6,7 @@
         Warn,
         Error,
         Debug,
-        Proximity,
+        Prox,
     };
 
     static class Logger
@@ -34,18 +34,24 @@
         /// yyyy-mm-dd hh:mm:ss|Severity|Message
         /// </summary>
         /// <param name="severity">The log severity. Debug logs are only reported if IsDebugEnabled = true</param>
+        /// <param name="source">The source of the log message.</param>
         /// <param name="message">The message to output to the console</param>
-        public static void Log(Severity severity, string message)
+        public static void Log(Severity severity, string source, string message)
         {
             // Filter out debug messages if they're not being logged
             if (severity == Severity.Debug && !IsDebugEnabled) return;
 
-            // Get the time stamp of the message and format it properly
-            string dateTimeStamp = String.Format("{0:s}", DateTime.Now).Replace('T', ' ');
-
             EnableSeverityColors(severity);
 
-            Console.WriteLine($"{dateTimeStamp}|{severity}|{message}");
+            // Most Proximity logs will already have the severity and source included, so we don't need to output it again
+            if (severity == Severity.Prox && message.Contains("[Proximity]"))
+            {
+                Console.WriteLine(message);
+            }
+            else
+            {
+                Console.WriteLine($"{severity,-5} [{source}] {message}");
+            }
             
             // ARGTODO: Output logging message to a log file
 
@@ -55,47 +61,52 @@
         /// <summary>
         /// Log a message at the Info severity. Text is White
         /// </summary>
+        /// <param name="source">The source of the log message.</param>
         /// <param name="message">The message to output to the console</param>
-        public static void Info(string message)
+        public static void Info(string source, string message)
         {
-            Log (Severity.Info, message);
+            Log(Severity.Info, source, message);
         }
 
         /// <summary>
         /// Log a message at the Warn severity. Text is Magenta
         /// </summary>
+        /// <param name="source">The source of the log message.</param>
         /// <param name="message">The message to output to the console</param>
-        public static void Warn(string message)
+        public static void Warn(string source, string message)
         {
-            Log (Severity.Warn, message);
+            Log(Severity.Warn, source, message);
         }
 
         /// <summary>
         /// Log a message at the Error severity. Text is Red
         /// </summary>
+        /// <param name="source">The source of the log message.</param>
         /// <param name="message">The message to output to the console</param>
-        public static void Error(string message)
+        public static void Error(string source, string message)
         {
-            Log (Severity.Error, message);
+            Log(Severity.Error, source, message);
         }
 
         /// <summary>
         /// Log a message at the Debug severity. Text is Grey.
         /// Only logged if IsDebugEnabled = true 
         /// </summary>
+        /// <param name="source">The source of the log message.</param>
         /// <param name="message">The message to output to the console</param>
-        public static void Debug(string message)
+        public static void Debug(string source, string message)
         {
-            Log (Severity.Debug, message);
+            Log(Severity.Debug, source, message);
         }
 
         /// <summary>
         /// Log a message at the Proximity severity. Text is Cyan.
         /// </summary>
+        /// <param name="source">The source of the log message.</param>
         /// <param name="message">The message to output to the console</param>
-        public static void Proximity(string message)
+        public static void Proximity(string source, string message)
         {
-            Log (Severity.Proximity, message);
+            Log(Severity.Prox, source, message);
         }
 
         private static void EnableSeverityColors(Severity severity)
@@ -116,7 +127,7 @@
                 case Severity.Debug:
                     Console.ForegroundColor = DEBUG_COLOR;
                     break;
-                case Severity.Proximity:
+                case Severity.Prox:
                     Console.ForegroundColor = PROXIMITY_COLOR;
                     break;
             }

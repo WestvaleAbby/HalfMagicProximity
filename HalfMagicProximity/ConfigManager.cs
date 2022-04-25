@@ -5,6 +5,8 @@ namespace HalfMagicProximity
 {
     static class ConfigManager
     {
+        private const string LogSource = "ConfigManager";
+
         public static string ScryfallPath;
         public static string ProximityDirectory;
 
@@ -46,9 +48,9 @@ namespace HalfMagicProximity
                     // Determine whether debug logs are displayed
                     Logger.IsDebugEnabled = configOptions.GetProperty("IsDebugEnabled").GetBoolean();
                     if (Logger.IsDebugEnabled)
-                        Logger.Info($"Debug messages are enabled.");
+                        Logger.Info(LogSource, $"Debug messages are enabled.");
                     else
-                        Logger.Info($"Debug messages are disabled.");
+                        Logger.Info(LogSource, $"Debug messages are disabled.");
 
                     // Find path to scryfall json
                     ScryfallPath = configOptions.GetProperty("ScryfallPath").GetString();
@@ -57,7 +59,7 @@ namespace HalfMagicProximity
                     else if (!File.Exists(ScryfallPath))
                         throw new Exception($"Scryfall JSON not found at '{ScryfallPath}'!");
                     else
-                        Logger.Info($"Scryfall path pulled from config: '{ScryfallPath}'.");
+                        Logger.Info(LogSource, $"Scryfall path pulled from config: '{ScryfallPath}'.");
 
                     // Find path to proximity files
                     ProximityDirectory = configOptions.GetProperty("ProximityDirectory").GetString();
@@ -66,42 +68,42 @@ namespace HalfMagicProximity
                     else if (!Directory.Exists(ProximityDirectory))
                         throw new Exception($"Proximity directory not found at '{ProximityDirectory}'!");
                     else
-                        Logger.Info($"Proximity directory pulled from config: '{ProximityDirectory}'.");
+                        Logger.Info(LogSource, $"Proximity directory pulled from config: '{ProximityDirectory}'.");
 
                     // Determine what art extension to use. Defaults to '.jpg'
                     ArtFileExtension = configOptions.GetProperty("ArtFileExtension").GetString().ToLower();
                     if (ArtFileExtension != ".jpg" && ArtFileExtension != ".jpeg" && ArtFileExtension != ".png")
                     {
-                        Logger.Warn($"Invalid art file extension '{ArtFileExtension}'. Defaulting to '{defaultArtFileExtension}'.");
+                        Logger.Warn(LogSource, $"Invalid art file extension '{ArtFileExtension}'. Defaulting to '{defaultArtFileExtension}'.");
                         ArtFileExtension = defaultArtFileExtension;
                     }
                     else
                     {
-                        Logger.Info($"Art file extension pulled from config: '{ArtFileExtension}'.");
+                        Logger.Info(LogSource, $"Art file extension pulled from config: '{ArtFileExtension}'.");
                     }
 
                     // Determine if we're overriding card rarity so the whole set matches
                     ProxyRarityOverride = configOptions.GetProperty("ProxyRarityOverride").GetString().ToLower();
                     if (string.IsNullOrEmpty(ProxyRarityOverride))
                     {
-                        Logger.Info($"No proxy rarity override supplied. Using card defaults from Scryfall.");
+                        Logger.Info(LogSource, $"No proxy rarity override supplied. Using card defaults from Scryfall.");
                     }
                     else if (!validRarities.Contains(ProxyRarityOverride))
                     {
-                        Logger.Warn($"Invalid proxy rarity override supplied: {ProxyRarityOverride}. Using card defaults from Scryfall.");
+                        Logger.Warn(LogSource, $"Invalid proxy rarity override supplied: {ProxyRarityOverride}. Using card defaults from Scryfall.");
                         ProxyRarityOverride = "";
                     }
                     else
                     {
-                        Logger.Info($"Proxy rarity override pulled from config: '{ProxyRarityOverride}'.");
+                        Logger.Info(LogSource, $"Proxy rarity override pulled from config: '{ProxyRarityOverride}'.");
                     }
 
                     // Determine whether we're cleaning up the generated proxies, or leaving them raw
                     DeleteBadFaces = configOptions.GetProperty("DeleteBadFaces").GetBoolean();
                     if (DeleteBadFaces)
-                        Logger.Info($"Bad proxy faces will be deleted once all proxies have been rendered.");
+                        Logger.Info(LogSource, $"Bad proxy faces will be deleted once all proxies have been rendered.");
                     else
-                        Logger.Warn($"Bad proxy faces will not be automatically deleted.");
+                        Logger.Warn(LogSource, $"Bad proxy faces will not be automatically deleted.");
 
                     // Determine if any sets are illegal in the format
                     IllegalSetCodes.Clear();
@@ -109,14 +111,14 @@ namespace HalfMagicProximity
                     for (int i = 0; i < illegalSetCodeElement.GetArrayLength(); i++)
                     {
                         IllegalSetCodes.Add(illegalSetCodeElement[i].ToString().ToLower());
-                        Logger.Info($"Added {IllegalSetCodes[i]} to list of illegal sets.");
+                        Logger.Info(LogSource, $"Added {IllegalSetCodes[i]} to list of illegal sets.");
                     }
 
                     // Determine whether we're using the full card list, or only the debug cards
                     UseDebugCardSubset = configOptions.GetProperty("UseDebugCardSubset").GetBoolean();
                     if (UseDebugCardSubset)
                     {
-                        Logger.Warn($"Not using the full format, only the debug subset!");
+                        Logger.Warn(LogSource, $"Not using the full format, only the debug subset!");
 
                         DebugCards.Clear();
                         JsonElement debugCardElement = configOptions.GetProperty("DebugCards");
@@ -126,19 +128,19 @@ namespace HalfMagicProximity
 
                             if (!debugCard.Contains("//"))
                             {
-                                Logger.Warn($"Debug card '{debugCard}' does not have '//'. Please double check that you have the full card name.");
+                                Logger.Warn(LogSource, $"Debug card '{debugCard}' does not have '//'. Please double check that you have the full card name.");
                             }
                             else
                             {
                                 DebugCards.Add(debugCard);
-                                Logger.Info($"Added '{DebugCards.Last()}' to list of debug cards.");
+                                Logger.Info(LogSource, $"Added '{DebugCards.Last()}' to list of debug cards.");
                             }
 
                         }
                     }
                     else
                     {
-                        Logger.Info($"Using all legal cards.");
+                        Logger.Info(LogSource, $"Using all legal cards.");
                     }
 
                     // Find any cards for which we need to manually override the artist - typically the back half of adventures
@@ -152,12 +154,12 @@ namespace HalfMagicProximity
                         string card = cardElement.GetProperty("card").ToString().ToLower();
                         if (string.IsNullOrEmpty(card))
                         {
-                            Logger.Error($"Skipping artist override with no card name!");
+                            Logger.Error(LogSource, $"Skipping artist override with no card name!");
                             continue;
                         }
                         else if (!card.Contains("//"))
                         {
-                            Logger.Warn($"Artist override '{card}' does not have '//'. Please double check that you have the full card name.");
+                            Logger.Warn(LogSource, $"Artist override '{card}' does not have '//'. Please double check that you have the full card name.");
                             continue;
                         }
 
@@ -165,7 +167,7 @@ namespace HalfMagicProximity
                         string artist = cardElement.GetProperty("artist").ToString();
                         if (string.IsNullOrEmpty(artist))
                         {
-                            Logger.Error($"Skipping artist override for '{card}' with no artist name!");
+                            Logger.Error(LogSource, $"Skipping artist override for '{card}' with no artist name!");
                             continue;
                         }
 
@@ -175,24 +177,24 @@ namespace HalfMagicProximity
                         if (faceString == "front")
                             face = CardFace.Front;
                         else if (faceString != "back")
-                            Logger.Warn($"Manual artist override for '{card}' has its face improperly specified. Defaulting to 'Back'.");
+                            Logger.Warn(LogSource, $"Manual artist override for '{card}' has its face improperly specified. Defaulting to 'Back'.");
 
                         ManualArtistOverrides.Add(new ManualArtistOverride(card, face, artist));
-                        Logger.Info($"Added '{ManualArtistOverrides.Last().CardName}' to list of artist overrides.");
+                        Logger.Info(LogSource, $"Added '{ManualArtistOverrides.Last().CardName}' to list of artist overrides.");
                     }
                 }
             }
             catch (FileNotFoundException e)
             {
-                Logger.Error($"Config file not found: {e.Message}");
+                Logger.Error(LogSource, $"Config file not found: {e.Message}");
             }
             catch (JsonException e)
             {
-                Logger.Error($"Config JSON Error: {e.Message}");
+                Logger.Error(LogSource, $"Config JSON Error: {e.Message}");
             }
             catch (Exception e)
             {
-                Logger.Error($"Config Error: {e.Message}");
+                Logger.Error(LogSource, $"Config Error: {e.Message}");
             }
         }
     }
