@@ -46,7 +46,7 @@ namespace HalfMagicProximity
                     JsonElement configOptions = configDoc.RootElement.GetProperty("hlfOptions");
 
                     ParseIsDebugEnabled(configOptions);
-                    ParsePaths(configOptions);
+                    if (!ParsePaths(configOptions)) return;
                     ParseArtExtension(configOptions);
                     ParseRarityOverride(configOptions);
                     ParseProxyCleanup(configOptions);
@@ -84,41 +84,45 @@ namespace HalfMagicProximity
         /// <summary>
         /// Try to find paths for scryfall JSON and proximity directory
         /// </summary>
-        /// <param name="configOptions"></param>
-        private static void ParsePaths(JsonElement configOptions)
+        private static bool ParsePaths(JsonElement configOptions)
         {
-            try
+            // Find path to scryfall json
+            string scryfallString = configOptions.GetProperty("ScryfallPath").GetString();
+            if (string.IsNullOrEmpty(scryfallString))
             {
-                // Find path to scryfall json
-                ScryfallPath = configOptions.GetProperty("ScryfallPath").GetString();
-                if (string.IsNullOrEmpty(ScryfallPath))
-                    throw new Exception($"Path to Scryfall JSON not supplied!");
-                else if (!File.Exists(ScryfallPath))
-                    throw new Exception($"Scryfall JSON not found at '{ScryfallPath}'!");
-                else
-                    Logger.Info(LogSource, $"Scryfall path pulled from config: '{ScryfallPath}'.");
+                Logger.Error(LogSource, $"Path to Scryfall JSON not supplied!");
+                return false;
+            }
+            else if (!File.Exists(scryfallString))
+            {
+                Logger.Error(LogSource, $"Scryfall JSON not found at '{scryfallString}'!");
+                return false;
+            }
+            else
+            {
+                ScryfallPath = scryfallString;
+                Logger.Info(LogSource, $"Scryfall path pulled from config: '{ScryfallPath}'.");
+            }
 
-                // Find path to proximity files
-                ProximityDirectory = configOptions.GetProperty("ProximityDirectory").GetString();
-                if (string.IsNullOrEmpty(ProximityDirectory))
-                    throw new Exception($"Path to Proximity directory not found!");
-                else if (!Directory.Exists(ProximityDirectory))
-                    throw new Exception($"Proximity directory not found at '{ProximityDirectory}'!");
-                else
-                    Logger.Info(LogSource, $"Proximity directory pulled from config: '{ProximityDirectory}'.");
-            }
-            catch (FileNotFoundException e)
+            // Find path to proximity files
+            string proximityString = configOptions.GetProperty("ProximityDirectory").GetString();
+            if (string.IsNullOrEmpty(proximityString))
             {
-                Logger.Error(LogSource, $"Config file not found: {e.Message}");
+                Logger.Error(LogSource, $"Path to Proximity directory not found!");
+                return false;
             }
-            catch (JsonException e)
+            else if (!Directory.Exists(proximityString))
             {
-                Logger.Error(LogSource, $"Config JSON Error: {e.Message}");
+                Logger.Error(LogSource, $"Proximity directory not found at '{ProximityDirectory}'!");
+                return false;
             }
-            catch (Exception e)
+            else
             {
-                Logger.Error(LogSource, $"Config Error: {e.Message}");
+                ProximityDirectory = proximityString;
+                Logger.Info(LogSource, $"Proximity directory pulled from config: '{ProximityDirectory}'.");
             }
+
+            return true;
         }
 
         /// <summary>
