@@ -4,6 +4,8 @@ namespace HalfMagicProximity
 {
     public class CardManager
     {
+        private const string LogSource = "CardManager";
+
         public List<CardData> Cards { get; } = new List<CardData>();
 
         public void ParseJson(string jsonPath)
@@ -17,11 +19,11 @@ namespace HalfMagicProximity
 
                     if (root.GetArrayLength() == 0)
                     {
-                        Logger.Error($"No cards found in the Scryfall JSON: {jsonPath}");
+                        Logger.Error(LogSource, $"No cards found in the Scryfall JSON: {jsonPath}");
                         return;
                     }
 
-                    Logger.Debug($"Filtering {root.GetArrayLength()} cards.");
+                    Logger.Debug(LogSource, $"Filtering {root.GetArrayLength()} cards.");
                     for (int i = 0; i < root.GetArrayLength(); i++)
                     {
                         JsonElement node = root[i];
@@ -71,21 +73,21 @@ namespace HalfMagicProximity
                 }
 
                 if (Cards.Count == 0)
-                    Logger.Error("No legal cards found!");
+                    Logger.Error(LogSource, "No legal cards found!");
                 else
-                    Logger.Info($"There are {Cards.Count} legal cards.");
+                    Logger.Info(LogSource, $"There are {Cards.Count} legal cards.");
             }
             catch (FileNotFoundException e)
             {
-                Logger.Error($"JSON file not found: {e.Message}");
+                Logger.Error(LogSource, $"JSON file not found: {e.Message}");
             }
             catch (JsonException e)
             {
-                Logger.Error($"JSON Exception: {e.Message}");
+                Logger.Error(LogSource, $"JSON Exception: {e.Message}");
             }
             catch (Exception e)
             {
-                Logger.Error($"Error parsing JSON: {e.Message}");
+                Logger.Error(LogSource, $"Error parsing JSON: {e.Message}");
             }
         }
 
@@ -121,17 +123,17 @@ namespace HalfMagicProximity
                     cardFaces[i].CorrectArtist(manualArtistOverride.Artist);
 
                 if (cardFaces[i].NeedsWatermarkOverride)
-                    Logger.Debug($"'{cardFaces[i].Name}' needs a watermark override for {cardFaces[i].Watermark}.");
+                    Logger.Debug(LogSource, $"'{cardFaces[i].Name}' needs a watermark override for {cardFaces[i].Watermark}.");
 
                 Cards.Add(cardFaces[i]);
-                Logger.Debug($"Added {cardFaces[i].DisplayInfo}");
+                Logger.Debug(LogSource, $"Added {cardFaces[i].DisplayInfo}");
             }
 
             cardFaces[0].OtherFace = cardFaces[1];
             cardFaces[1].OtherFace = cardFaces[0];
 
             if (cardFaces[0].NeedsColorOverride)
-                Logger.Debug($"'{cardFaces[0].Name}' needs a color override: Front is {cardFaces[0].Color}, Back is {cardFaces[1].Color}.");
+                Logger.Debug(LogSource, $"'{cardFaces[0].Name}' needs a color override: Front is {cardFaces[0].Color}, Back is {cardFaces[1].Color}.");
 
             if (cardFaces[0].NeedsArtistOverride)
             {
@@ -139,9 +141,9 @@ namespace HalfMagicProximity
                 string backArtist = cardFaces[1].Artist;
 
                 if (frontArtist == backArtist)
-                    Logger.Debug($"'{cardFaces[0].Name}' needs an artist override since it was manually corrected.");
+                    Logger.Debug(LogSource, $"'{cardFaces[0].Name}' needs an artist override since it was manually corrected.");
                 else
-                    Logger.Debug($"'{cardFaces[0].Name}' needs an artist override: Front is '{cardFaces[0].Artist}', Back is '{cardFaces[1].Artist}'.");
+                    Logger.Debug(LogSource, $"'{cardFaces[0].Name}' needs an artist override: Front is '{cardFaces[0].Artist}', Back is '{cardFaces[1].Artist}'.");
             }
         }
 
@@ -175,7 +177,7 @@ namespace HalfMagicProximity
             catch (KeyNotFoundException e)
             {
                 if (property != CardProperty.Watermark)
-                    Logger.Error($"Card JSON missing {property} value: {e.Message}");
+                    Logger.Error(LogSource, $"Card JSON missing {property} value: {e.Message}");
             }
 
             return stringProperty;
@@ -191,7 +193,7 @@ namespace HalfMagicProximity
             catch (KeyNotFoundException e)
             {
                 if (property != CardProperty.Watermark)
-                    Logger.Error($"Card JSON missing {property} value: {e.Message}");
+                    Logger.Error(LogSource, $"Card JSON missing {property} value: {e.Message}");
             }
 
             return propertyValue;
@@ -229,7 +231,7 @@ namespace HalfMagicProximity
                 case CardProperty.SetCode: return "set";
                 case CardProperty.Watermark: return "watermark";
                 default:
-                    Logger.Error($"Tried to access a card property that doesn't exist: {property}");
+                    Logger.Error(LogSource, $"Tried to access a card property that doesn't exist: {property}");
                     return "";
             }
         }
@@ -241,7 +243,7 @@ namespace HalfMagicProximity
                 case "split": return CardLayout.Split;
                 case "adventure": return CardLayout.Adventure;
                 default:
-                    Logger.Error($"Card is missing its layout!");
+                    Logger.Error(LogSource, $"Card is missing its layout!");
                     return CardLayout.None;
             }
         }

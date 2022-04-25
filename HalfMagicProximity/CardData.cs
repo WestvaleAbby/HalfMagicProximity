@@ -5,6 +5,9 @@
 
     public class CardData
     {
+        private const string LogSource = "Card";
+        private string namedLogSource => $"{LogSource}: {Name}";
+
         public string Name { get; private set; }
         public string Color { get; private set; }
         public int ColorCount { get; private set; }
@@ -23,19 +26,29 @@
 
         public CardData(string name, string manaCost, string art, string artist, CardFace face, CardLayout layout, string watermark)
         {
-            // Don't need to check if watermark is empty, empty indicates no watermark
-            if (string.IsNullOrEmpty(name)) Logger.Warn("Card object created with no name!");
-            if (string.IsNullOrEmpty(manaCost)) Logger.Warn("Card object created with no manaCost!");
-            if (string.IsNullOrEmpty(art)) Logger.Warn("Card object created with no art file name!");
-            if (string.IsNullOrEmpty(artist)) Logger.Warn("Card object created with no artist name!");
-            if (layout == CardLayout.None) Logger.Warn("Card object created with no layout!");
-
+            if (string.IsNullOrEmpty(name)) 
+                Logger.Warn("CardData", "Card object created with no name!");
             Name = name;
+
+            if (string.IsNullOrEmpty(manaCost)) 
+                Logger.Warn(namedLogSource, "Card object created with no manaCost!");
             GetColorData(manaCost);
+
+            if (string.IsNullOrEmpty(art)) 
+                Logger.Warn(namedLogSource, "Card object created with no art file name!");
             ArtFileName = art;
+
+            if (string.IsNullOrEmpty(artist)) 
+                Logger.Warn(namedLogSource, "Card object created with no artist name!");
             Artist = artist;
-            Face = face;
+
+            if (layout == CardLayout.None) 
+                Logger.Warn(namedLogSource, "Card object created with no layout!");
             Layout = layout;
+
+            Face = face;
+
+            // Don't need to check if watermark is empty, empty indicates no watermark
             Watermark = watermark;
         }
 
@@ -68,13 +81,13 @@
             switch (color)
             {
                 case "UG":
-                    Logger.Debug($"Correcting color of '{DisplayName}' from UG to GU.");
+                    Logger.Debug(namedLogSource, $"Correcting color of '{DisplayName}' from UG to GU.");
                     return "GU";
                 case "WG":
-                    Logger.Debug($"Correcting color of '{DisplayName}' from WG to GW.");
+                    Logger.Debug(namedLogSource, $"Correcting color of '{DisplayName}' from WG to GW.");
                     return "GW";
                 case "WR":
-                    Logger.Debug($"Correcting color of '{DisplayName}' from WR to RW.");
+                    Logger.Debug(namedLogSource, $"Correcting color of '{DisplayName}' from WR to RW.");
                     return "RW";
                 default: 
                     return color;
@@ -82,7 +95,7 @@
         }
         public void CorrectArtist(string newArtist)
         {
-            Logger.Debug($"Manually correcting artist of '{DisplayName}' from '{Artist}' to '{newArtist}'.");
+            Logger.Debug(LogSource + $": {Name}", $"Manually correcting artist of '{DisplayName}' from '{Artist}' to '{newArtist}'.");
             manualArtist = true;
             Artist = newArtist;
         }

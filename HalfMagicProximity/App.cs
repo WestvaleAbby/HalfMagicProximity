@@ -1,4 +1,4 @@
-﻿namespace HalfMagicProximity // Note: actual namespace depends on the project name.
+﻿namespace HalfMagicProximity
 {
     internal class App
     {
@@ -18,7 +18,7 @@
             }
             else
             {
-                Logger.Error($"Invalid config file!");
+                Logger.Error("App", $"Invalid config file!");
             }
         }
     }

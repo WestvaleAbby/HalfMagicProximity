@@ -5,6 +5,8 @@ namespace HalfMagicProximity
 {
     public class ProximityManager
     {
+        private const string LogSource = "ProximityManager";
+
         private List<CardData> allCards;
 
         private const string BatFileName = "hlfproxies.bat";
@@ -25,18 +27,18 @@ namespace HalfMagicProximity
 
         public void Run()
         {
-            Logger.Info("Beginning Proximity preparations.");
+            Logger.Info(LogSource, "Beginning Proximity preparations.");
 
             GenerateDeckFiles();
 
             if (VerifyProximityFiles())
             {
-                Logger.Info("All necessary proximity files are present. Executing now.");
+                Logger.Info(LogSource, "All necessary proximity files are present. Executing now.");
                 ExecuteProximityBatchFile();
             }
             else
             {
-                Logger.Error($"Unable to run proximity. You may be able to run it manually using the following:\n - Deck File: {deckPath} \n - Batch File: {batPath}");
+                Logger.Error(LogSource, $"Unable to run proximity. You may be able to run it manually using the following:\n - Deck File: {deckPath} \n - Batch File: {batPath}");
             }
         }
 
@@ -61,17 +63,17 @@ namespace HalfMagicProximity
                 }
 
                 if (File.Exists(deckPath))
-                    Logger.Info($"Generated deck file with {successfulCards} at '{deckPath}'.");
+                    Logger.Info(LogSource, $"Generated deck file with {successfulCards} at '{deckPath}'.");
                 else
-                    Logger.Error($"Unable to generate deck file at '{deckPath}'!");
+                    Logger.Error(LogSource, $"Unable to generate deck file at '{deckPath}'!");
             }
             catch (DirectoryNotFoundException e)
             {
-                Logger.Error($"Unable to find Proximity directory '{ConfigManager.ProximityDirectory}'!");
+                Logger.Error(LogSource, $"Unable to find Proximity directory '{ConfigManager.ProximityDirectory}'!");
             }
             catch (Exception e)
             {
-                Logger.Error($"Error generating proximity deck file: {e.Message}");
+                Logger.Error(LogSource, $"Error generating proximity deck file: {e.Message}");
             }
         }
 
@@ -107,7 +109,7 @@ namespace HalfMagicProximity
                 cardString += OverrideTemplate + "image_uris.art_crop:\"\"file:///" + artPath + "\"\"";
             }
 
-            Logger.Debug(cardString);
+            Logger.Debug(LogSource, cardString);
 
             return cardString;
         }
@@ -117,44 +119,44 @@ namespace HalfMagicProximity
             // Check for the deck (that we presumably just made)
             if (File.Exists(deckPath))
             {
-                Logger.Info($"Deck file '{DeckFileName}' is present.");
+                Logger.Info(LogSource, $"Deck file '{DeckFileName}' is present.");
             }
             else
             {
-                Logger.Error($"Deck file not found: {deckPath}");
+                Logger.Error(LogSource, $"Deck file not found: {deckPath}");
                 return false;
             }
 
             // Check for the proximity jar file
             if (File.Exists(proximityPath))
             {
-                Logger.Info($"Proximity file '{ProximityJarName}' is present.");
+                Logger.Info(LogSource, $"Proximity file '{ProximityJarName}' is present.");
             }
             else
             {
-                Logger.Error($"Proximity jar file not found: {proximityPath}");
+                Logger.Error(LogSource, $"Proximity jar file not found: {proximityPath}");
                 return false;
             }
 
             // Check that the proximity batch file exists
             if (File.Exists(batPath))
             {
-                Logger.Info($"Batch file '{BatFileName}' is present.");
+                Logger.Info(LogSource, $"Batch file '{BatFileName}' is present.");
             }
             else
             {
-                Logger.Warn($"Batch file not found. Recreating now.");
+                Logger.Warn(LogSource, $"Batch file not found. Recreating now.");
 
                 // If the batch file doesn't exist, try and recreate it since its contents are very light
                 CreateBatchFile();
 
                 if (File.Exists(batPath))
                 {
-                    Logger.Info($"Batch file '{BatFileName}' successfully recreated.");
+                    Logger.Info(LogSource, $"Batch file '{BatFileName}' successfully recreated.");
                 }
                 else
                 {
-                    Logger.Error($"Unable to recreate batch file '{BatFileName}': {batPath}");
+                    Logger.Error(LogSource, $"Unable to recreate batch file '{BatFileName}': {batPath}");
 
                     return false;
                 }
@@ -178,11 +180,11 @@ namespace HalfMagicProximity
             }
             catch (DirectoryNotFoundException e)
             {
-                Logger.Error($"Unable to find Proximity directory '{ConfigManager.ProximityDirectory}'!");
+                Logger.Error(LogSource, $"Unable to find Proximity directory '{ConfigManager.ProximityDirectory}'!");
             }
             catch (Exception e)
             {
-                Logger.Error($"Error generating proximity batch file: {e.Message}");
+                Logger.Error(LogSource, $"Error generating proximity batch file: {e.Message}");
             }
         }
 
@@ -201,7 +203,8 @@ namespace HalfMagicProximity
 
         private void HandleProximityOutput(object sender, DataReceivedEventArgs args)
         {
-            Logger.Proximity(args.Data);
+            if (!string.IsNullOrEmpty(args.Data))
+                Logger.Proximity("Proximity", args.Data.Replace(Environment.NewLine, ""));
         }
     }
 }
