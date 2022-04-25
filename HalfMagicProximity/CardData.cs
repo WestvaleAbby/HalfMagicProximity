@@ -17,6 +17,7 @@
         public string Watermark { get; private set; }
 
         public bool NeedsColorOverride => Color != OtherFace.Color;
+        public bool NeedsArtOverride => Face == CardFace.Back || Layout == CardLayout.Split;
         public bool NeedsArtistOverride => Artist != OtherFace.Artist || manualArtist;
         public bool NeedsWatermarkOverride => !string.IsNullOrEmpty(Watermark);
 

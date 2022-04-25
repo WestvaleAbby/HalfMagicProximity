@@ -6,6 +6,7 @@
         Warn,
         Error,
         Debug,
+        Proximity,
     };
 
     static class Logger
@@ -14,6 +15,7 @@
         private const ConsoleColor WARN_COLOR = ConsoleColor.Magenta;
         private const ConsoleColor ERROR_COLOR = ConsoleColor.Red;
         private const ConsoleColor DEBUG_COLOR = ConsoleColor.DarkGray;
+        private const ConsoleColor PROXIMITY_COLOR = ConsoleColor.Cyan;
         private const ConsoleColor BACK_COLOR = ConsoleColor.Black;
 
         private static ConsoleColor storedForegroundColor;
@@ -87,6 +89,15 @@
             Log (Severity.Debug, message);
         }
 
+        /// <summary>
+        /// Log a message at the Proximity severity. Text is Cyan.
+        /// </summary>
+        /// <param name="message">The message to output to the console</param>
+        public static void Proximity(string message)
+        {
+            Log (Severity.Proximity, message);
+        }
+
         private static void EnableSeverityColors(Severity severity)
         {
             Console.BackgroundColor = BACK_COLOR;
@@ -104,6 +115,9 @@
                     break;
                 case Severity.Debug:
                     Console.ForegroundColor = DEBUG_COLOR;
+                    break;
+                case Severity.Proximity:
+                    Console.ForegroundColor = PROXIMITY_COLOR;
                     break;
             }
         }
