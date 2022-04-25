@@ -163,7 +163,7 @@ namespace HalfMagicProximity
             string[] nameSubstrings = name.Split('/');
             int index = (face == CardFace.Front ? 0 : nameSubstrings.Length - 1);
 
-            return nameSubstrings[index].Replace(" ", "").ToLower() + ConfigManager.ArtFileExtension;
+            return nameSubstrings[index].Replace(" ", "").Replace("'", "").ToLower() + ConfigManager.ArtFileExtension;
         }
 
         // Extract the value of a json element's property as a string

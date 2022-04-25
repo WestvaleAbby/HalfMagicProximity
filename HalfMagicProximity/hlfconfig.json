@@ -7,13 +7,158 @@
 		"ProxyRarityOverride": "uncommon",
 		"DeleteBadFaces": false,
 		"IllegalSetCodes": [ "htr", "cmb" ],
-		"UseDebugCardSubset": true,
+		"UseDebugCardSubset": false,
 		"DebugCards": [ "Alive // Well", "Fae of Wishes // Granted", "Find // Finality", "Hide // Seek", "Road // Ruin", "Night // Day", "Fast // Furious" ],
 		"ManualArtistOverrides": [
+			{
+				"card": "Animating Faerie // Bring to Life",
+				"face": "Back",
+				"artist": "Chris Seaman"
+			},
+			{
+				"card": "Ardenvale Tactician // Dizzying Swoop",
+				"face": "Back",
+				"artist": "Aaron Miller"
+			},
+			{
+				"card": "Beanstalk Giant // Fertile Footsteps",
+				"face": "Back",
+				"artist": "Nick Southam"
+			},
+			{
+				"card": "Bonecrusher Giant // Stomp",
+				"face": "Back",
+				"artist": "John Severin Brassell"
+			},
+			{
+				"card": "Brazen Borrower // Petty Theft",
+				"face": "Back",
+				"artist": "Iris Compiet"
+			},
+			{
+				"card": "Curious Pair // Treats to Share",
+				"face": "Back",
+				"artist": "Josu Hernaiz"
+			},
+			{
+				"card": "Embereth Shieldbreaker // Battle Display",
+				"face": "Back",
+				"artist": "Jeremy Wilson"
+			},
 			{
 				"card": "Fae of Wishes // Granted",
 				"face": "Back",
 				"artist": "Wylie Beckert"
+			},
+			{
+				"card": "Faerie Guidemother // Gift of the Fae",
+				"face": "Back",
+				"artist": "Chuck Lukacs"
+			},
+			{
+				"card": "Flaxen Intruder // Welcome Home",
+				"face": "Back",
+				"artist": "Omar Rayyan"
+			},
+			{
+				"card": "Foulmire Knight // Profane Insight",
+				"face": "Back",
+				"artist": "Rebecca On"
+			},
+			{
+				"card": "Garenbrig Carver // Sheild's Might",
+				"face": "Back",
+				"artist": "Craig J. Spearing"
+			},
+			{
+				"card": "Giant Killer // Chop Down",
+				"face": "Back",
+				"artist": "Shawn Wood"
+			},
+			{
+				"card": "Hypnotic Sprite // Mesmeric Glare",
+				"face": "Back",
+				"artist": "Ravenna Tran"
+			},
+			{
+				"card": "Lonesome Unicorn // Rider in Need",
+				"face": "Back",
+				"artist": "Alayna Danner"
+			},
+			{
+				"card": "Lovestruck Beast // Heart's Desire",
+				"face": "Back",
+				"artist": "Tyler Walpole"
+			},
+			{
+				"card": "Merchant of the Vale // Haggle",
+				"face": "Back",
+				"artist": "John Severin Brassell"
+			},
+			{
+				"card": "Merfolk Secret Keeper // Venture Deeper",
+				"face": "Back",
+				"artist": "Allen Williams"
+			},
+			{
+				"card": "Murderous Rider // Swift End",
+				"face": "Back",
+				"artist": "Ravenna Tran"
+			},
+			{
+				"card": "Oakhame Ranger // Bring Back",
+				"face": "Back",
+				"artist": "Omar Rayyan"
+			},
+			{
+				"card": "Order of Midnight // Alter Fate",
+				"face": "Back",
+				"artist": "Seb McKinnon"
+			},
+			{
+				"card": "Queen of Winter // Rage of Winter",
+				"face": "Back",
+				"artist": "Allen Williams"
+			},
+			{
+				"card": "Realm-Cloaked Giant // Cast Off",
+				"face": "Back",
+				"artist": "Alayna Danner"
+			},
+			{
+				"card": "Reaper of Night // Harvest Fear",
+				"face": "Back",
+				"artist": "Olena Richards"
+			},
+			{
+				"card": "Rimrock Knight // Boulder Rush",
+				"face": "Back",
+				"artist": "Josu Hernaiz"
+			},
+			{
+				"card": "Rosethorn Acolyte // Seasonal Ritual",
+				"face": "Back",
+				"artist": "Wylie Beckert"
+			},
+			{
+				"card": "Shepherd of the Flock // Usher to Safety",
+				"face": "Back",
+				"artist": "Craig J. Spearing"
+			},
+			{
+				"card": "Silverflame Squire // On Alert",
+				"face": "Back",
+				"artist": "Josu Hernaiz"
+			},
+			{
+				"card": "Smitten Swordmaster // Curry Favor",
+				"face": "Back",
+				"artist": "Shawn Wood"
+			},
+			{
+				"card": "Tuinvale Treefolk // Oaken Boon",
+				"face": "Back",
+				"artist": "James Arnold"
 			},
 			{
 				"card": "Hide // Seek",
@@ -24,6 +169,16 @@
 				"card": "Hide // Seek",
 				"face": "Back",
 				"artist": "Zoltan Boros & Gabor Szikszai"
+			},
+			{
+				"card": "Trial // Error",
+				"face": "Front",
+				"artist": "Ron Spears & Wayne Reynolds"
+			},
+			{
+				"card": "Trial // Error",
+				"face": "Back",
+				"artist": "Ron Spears & Wayne Reynolds"
 			}
 		]
 	}
