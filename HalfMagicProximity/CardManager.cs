@@ -23,7 +23,7 @@ namespace HalfMagicProximity
                         return;
                     }
 
-                    Logger.Debug(LogSource, $"Filtering {root.GetArrayLength()} cards.");
+                    Logger.Info(LogSource, $"Filtering {root.GetArrayLength()} cards. This may take several minutes, please do not close this window!");
                     for (int i = 0; i < root.GetArrayLength(); i++)
                     {
                         JsonElement node = root[i];
@@ -75,7 +75,7 @@ namespace HalfMagicProximity
                 if (Cards.Count == 0)
                     Logger.Error(LogSource, "No legal cards found!");
                 else
-                    Logger.Info(LogSource, $"There are {Cards.Count} legal cards.");
+                    Logger.Info(LogSource, $"Found {Cards.Count} legal cards.");
             }
             catch (FileNotFoundException e)
             {
@@ -126,7 +126,11 @@ namespace HalfMagicProximity
                     Logger.Debug(LogSource, $"'{cardFaces[i].Name}' needs a watermark override for {cardFaces[i].Watermark}.");
 
                 Cards.Add(cardFaces[i]);
-                Logger.Debug(LogSource, $"Added {cardFaces[i].DisplayInfo}");
+
+                if (Logger.IsDebugEnabled)
+                    Logger.Debug(LogSource, $"Added {cardFaces[i].DisplayInfo}");
+                else
+                    Logger.Info(LogSource, $"Added {cardFaces[i].DisplayName}");
             }
 
             cardFaces[0].OtherFace = cardFaces[1];

@@ -27,7 +27,7 @@
         public CardData(string name, string manaCost, string art, string artist, CardFace face, CardLayout layout, string watermark)
         {
             if (string.IsNullOrEmpty(name)) 
-                Logger.Warn("CardData", "Card object created with no name!");
+                Logger.Warn(LogSource, "Card object created with no name!");
             Name = name;
 
             if (string.IsNullOrEmpty(manaCost)) 

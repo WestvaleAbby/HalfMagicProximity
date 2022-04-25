@@ -96,6 +96,9 @@
         /// <param name="message">The message to output to the console</param>
         public static void Debug(string source, string message)
         {
+            // Filter out debug messages if they're not being logged
+            if (!IsDebugEnabled) return;
+
             Log(Severity.Debug, source, message);
         }
 

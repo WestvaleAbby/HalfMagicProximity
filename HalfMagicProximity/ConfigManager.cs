@@ -185,8 +185,10 @@ namespace HalfMagicProximity
             for (int i = 0; i < illegalSetCodeElement.GetArrayLength(); i++)
             {
                 IllegalSetCodes.Add(illegalSetCodeElement[i].ToString().ToLower());
-                Logger.Info(LogSource, $"Added {IllegalSetCodes[i]} to list of illegal sets.");
+                Logger.Debug(LogSource, $"Added {IllegalSetCodes[i]} to list of illegal sets.");
             }
+
+            Logger.Info(LogSource, $"Loaded {IllegalSetCodes.Count} illegal sets.");
         }
 
         /// <summary>
@@ -212,9 +214,11 @@ namespace HalfMagicProximity
                     else
                     {
                         DebugCards.Add(debugCard);
-                        Logger.Info(LogSource, $"Added '{DebugCards.Last()}' to list of debug cards.");
+                        Logger.Debug(LogSource, $"Added '{DebugCards.Last()}' to list of debug cards.");
                     }
                 }
+
+                Logger.Info(LogSource, $"Loaded {DebugCards.Count} debug cards.");
             }
             else
             {
@@ -264,8 +268,10 @@ namespace HalfMagicProximity
                     Logger.Warn(LogSource, $"Manual artist override for '{card}' has its face improperly specified. Defaulting to 'Back'.");
 
                 ManualArtistOverrides.Add(new ManualArtistOverride(card, face, artist));
-                Logger.Info(LogSource, $"Added '{ManualArtistOverrides.Last().CardName}' to list of artist overrides.");
+                Logger.Debug(LogSource, $"Added '{ManualArtistOverrides.Last().CardName}' to list of artist overrides.");
             }
+
+            Logger.Info(LogSource, $"Loaded {ManualArtistOverrides.Count} manual artist overrides.");
         }
     }
 

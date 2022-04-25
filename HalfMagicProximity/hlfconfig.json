@@ -1,14 +1,44 @@
 {
 	"hlfOptions": {
-		"IsDebugEnabled": true,
+		"IsDebugEnabled": false,
 		"ScryfallPath": "D:\\Personal Files\\Docs\\Magic\\HalfMagic\\VS App\\default-cards-20220424210639.json",
 		"ProximityDirectory": "D:\\Personal Files\\Docs\\Magic\\HalfMagic\\VS App\\Proximity",
 		"ArtFileExtension": ".jpg",
 		"ProxyRarityOverride": "uncommon",
 		"DeleteBadFaces": false,
 		"IllegalSetCodes": [ "htr", "cmb" ],
-		"UseDebugCardSubset": false,
-		"DebugCards": [ "Alive // Well", "Fae of Wishes // Granted", "Find // Finality", "Hide // Seek", "Road // Ruin", "Night // Day", "Fast // Furious" ],
+		"UseDebugCardSubset": true,
+		"DebugCards": [
+			"Alive // Well",
+			"Fae of Wishes // Granted",
+			"Find // Finality",
+			"Hide // Seek",
+			"Road // Ruin",
+
+			"Night // Day",
+			"Fast // Furious",
+			"Animating Faerie // Bring to Life",
+			"Ardenvale Tactician // Dizzying Swoop",
+			"Beanstalk Giant // Fertile Footsteps",
+
+			"Bonecrusher Giant // Stomp",
+			"Brazen Borrower // Petty Theft",
+			"Curious Pair // Treats to Share",
+			"Embereth Shieldbreaker // Battle Display",
+			"Faerie Guidemother // Gift of the Fae",
+
+			"Flaxen Intruder // Welcome Home",
+			"Foulmire Knight // Profane Insight",
+			"Garenbrig Carver // Shield's Might",
+			"Giant Killer // Chop Down",
+			"Hypnotic Sprite // Mesmeric Glare",
+
+			"Lonesome Unicorn // Rider in Need",
+			"Lovestruck Beast // Heart's Desire",
+			"Merchant of the Vale // Haggle",
+			"Onward // Victory",
+			"Illusion // Reality"
+		],
 		"ManualArtistOverrides": [
 			{
 				"card": "Animating Faerie // Bring to Life",
@@ -66,7 +96,7 @@
 				"artist": "Rebecca On"
 			},
 			{
-				"card": "Garenbrig Carver // Sheild's Might",
+				"card": "Garenbrig Carver // Shield's Might",
 				"face": "Back",
 				"artist": "Craig J. Spearing"
 			},
