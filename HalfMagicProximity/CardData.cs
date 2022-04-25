@@ -6,6 +6,7 @@
     public class CardData
     {
         private const string LogSource = "Card";
+        private string namedLogSource => $"{LogSource}: {Name}";
 
         public string Name { get; private set; }
         public string Color { get; private set; }
@@ -30,19 +31,19 @@
             Name = name;
 
             if (string.IsNullOrEmpty(manaCost)) 
-                Logger.Warn(LogSource + $": {Name}", "Card object created with no manaCost!");
+                Logger.Warn(namedLogSource, "Card object created with no manaCost!");
             GetColorData(manaCost);
 
             if (string.IsNullOrEmpty(art)) 
-                Logger.Warn(LogSource + $": {Name}", "Card object created with no art file name!");
+                Logger.Warn(namedLogSource, "Card object created with no art file name!");
             ArtFileName = art;
 
             if (string.IsNullOrEmpty(artist)) 
-                Logger.Warn(LogSource + $": {Name}", "Card object created with no artist name!");
+                Logger.Warn(namedLogSource, "Card object created with no artist name!");
             Artist = artist;
 
             if (layout == CardLayout.None) 
-                Logger.Warn(LogSource + $": {Name}", "Card object created with no layout!");
+                Logger.Warn(namedLogSource, "Card object created with no layout!");
             Layout = layout;
 
             Face = face;
@@ -80,13 +81,13 @@
             switch (color)
             {
                 case "UG":
-                    Logger.Debug(LogSource + $": {Name}", $"Correcting color of '{DisplayName}' from UG to GU.");
+                    Logger.Debug(namedLogSource, $"Correcting color of '{DisplayName}' from UG to GU.");
                     return "GU";
                 case "WG":
-                    Logger.Debug(LogSource + $": {Name}", $"Correcting color of '{DisplayName}' from WG to GW.");
+                    Logger.Debug(namedLogSource, $"Correcting color of '{DisplayName}' from WG to GW.");
                     return "GW";
                 case "WR":
-                    Logger.Debug(LogSource + $": {Name}", $"Correcting color of '{DisplayName}' from WR to RW.");
+                    Logger.Debug(namedLogSource, $"Correcting color of '{DisplayName}' from WR to RW.");
                     return "RW";
                 default: 
                     return color;
