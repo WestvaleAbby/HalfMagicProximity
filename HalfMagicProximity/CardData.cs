@@ -18,6 +18,8 @@
         public CardLayout Layout { get; private set; }
         public CardData OtherFace { private get; set; }
         public string Watermark { get; private set; }
+        public string DisplayName => $"{Name} ({Layout} {Face})";
+        public string DisplayInfo => $"{DisplayName} | {Color} ({ColorCount} colors) | Artist: {Artist} | Art: '{ArtFileName}'";
 
         public bool NeedsColorOverride => Color != OtherFace.Color;
         public bool NeedsArtOverride => Face == CardFace.Back || Layout == CardLayout.Split;
@@ -100,7 +102,39 @@
             Artist = newArtist;
         }
 
-        public string DisplayName => $"{Name} ({Layout} {Face})";
-        public string DisplayInfo => $"{DisplayName} | {Color} ({ColorCount} colors) | Artist: {Artist} | Art: '{ArtFileName}'";
+        public bool ValidateCard()
+        {
+            if (string.IsNullOrEmpty(Name))
+            {
+                Logger.Warn(LogSource, $"Card is missing name!");
+                return false;
+            }
+
+            if (NeedsColorOverride && Color.Length != ColorCount)
+            {
+                Logger.Warn(namedLogSource, $"Colors and color count for {Name} are mismatched: {Color}, {ColorCount}");
+                return false;
+            }
+
+            if (NeedsWatermarkOverride && string.IsNullOrEmpty(Watermark))
+            {
+                Logger.Warn(namedLogSource, $"Watermark is missing from {Watermark}");
+                return false;
+            }
+
+            if (NeedsArtistOverride && string.IsNullOrEmpty(Artist))
+            {
+                Logger.Warn(namedLogSource, $"Artist is missing from {Watermark}");
+                return false;
+            }
+
+            if (NeedsArtOverride && string.IsNullOrEmpty(ArtFileName))
+            {
+                Logger.Warn(namedLogSource, $"Art file is missing from {ArtFileName}");
+                return false;
+            }
+
+            return true;
+        }
     }
 }

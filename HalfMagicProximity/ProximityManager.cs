@@ -15,28 +15,28 @@ namespace HalfMagicProximity
             this.allCards = allCards ?? throw new ArgumentNullException(nameof(allCards));
         }
 
-        private string batchName => "batch" + batches.Count;
         public void Run()
         {
             int batchEstimate = allCards.Count / ProximityBatch.MaxCardCount + 1;
             Logger.Info(LogSource, $"Splitting {allCards.Count} cards into an estimated {batchEstimate} batches.");
 
-            List<CardData> batchCards = new List<CardData>();
+            int processedCardCount = 0;
 
-            for (int i = 0; i < allCards.Count; i++)
+            while (processedCardCount < allCards.Count)
             {
-                // Close out the previous batch and start a new one
-                if (i % ProximityBatch.MaxCardCount == 0 && batchCards.Count > 0)
+                string batchName = "batch" + batches.Count;
+                batches.Add(new ProximityBatch(batchName, ProximityJarName));
+
+                // Add cards to the most recently created batch until it's full, then create a new one
+                do
                 {
-                    batches.Add(new ProximityBatch(batchName, ProximityJarName, batchCards));
+                    batches.Last().AddCard(allCards[processedCardCount]);
+                    processedCardCount++;
+
+                    Logger.Debug(LogSource, $"{allCards[processedCardCount].DisplayName} added to {batchName} ({processedCardCount}/{allCards.Count}).");
                 }
-
-                batchCards.Add(allCards[i]);
-                Logger.Debug(LogSource, $"{allCards[i].DisplayName} added to {batchName} ({batchCards.Count}/{ProximityBatch.MaxCardCount}).");
+                while (!batches.Last().IsFull && processedCardCount < allCards.Count);
             }
-
-            if (batchCards.Count > 0)
-                batches.Add(new ProximityBatch(batchName, ProximityJarName, batchCards));
 
             Logger.Info(LogSource, $"{batches.Count} batches successfully created.");
 

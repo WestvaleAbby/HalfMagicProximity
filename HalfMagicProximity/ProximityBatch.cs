@@ -19,11 +19,13 @@ namespace HalfMagicProximity
         private string proximityPath => Path.Combine(ConfigManager.ProximityDirectory, proximityFile);
 
         private List<CardData> batchCards = new List<CardData>();
+        public int CardCount => batchCards.Count;
+        public bool IsFull => batchCards.Count >= MaxCardCount;
+
         private string batchName;
         public bool IsBatchFunctional => !string.IsNullOrEmpty(batchName) && !string.IsNullOrEmpty(proximityFile) && batchCards.Count > 0;
-        private bool successfulInit;
 
-        public ProximityBatch(string name, string prox, List<CardData> cards)
+        public ProximityBatch(string name, string prox)
         {
             if (string.IsNullOrEmpty(name))
                 Logger.Error(LogSource, $"No batch name provided. Unable to run proximity without a batch name!");
@@ -35,25 +37,7 @@ namespace HalfMagicProximity
             else
                 proximityFile = prox;
 
-            if (cards.Count <= 0)
-                Logger.Error(namedLogSource, $"No cards provided for {batchName}. Unable to run proximity without cards!");
-            else
-                batchCards = cards;
-
-            // Initialize batch and verify that it's good to go
-            successfulInit = Init();
-
-            // Inform user of successful batch creation
-            if (IsBatchFunctional)
-            {
-                Logger.Info(namedLogSource, $"Batch created with {cards.Count} cards.");
-
-                if (Logger.IsDebugEnabled)
-                {
-                    for (int i = 0; i < cards.Count; i++)
-                        Logger.Debug(namedLogSource, $"Card {i}: {cards[i].DisplayName}");
-                }
-            }
+            Logger.Info(namedLogSource, $"{batchName} successfully created.");
         }
 
         /// <summary>
@@ -185,6 +169,8 @@ namespace HalfMagicProximity
             }
         }
 
+        private string deckContents = "";
+
         /// <summary>
         /// Generates the decklist for this batch
         /// </summary>
@@ -194,24 +180,16 @@ namespace HalfMagicProximity
 
             try
             {
-                int successfulCards = 0;
-
                 using (FileStream deckStream = File.Create(deckPath))
                 {
-                    // Add cards to file
-                    foreach (CardData card in batchCards)
-                    {
-                        string cardString = GenerateCardString(card);
-                        byte[] cardBytes = new UTF8Encoding(true).GetBytes(cardString + Environment.NewLine);
+                    byte[] cardBytes = new UTF8Encoding(true).GetBytes(deckContents);
 
-                        // Write card string to the deck file
-                        deckStream.Write(cardBytes, 0, cardBytes.Length);
-                        successfulCards++;
-                    }
+                    // Write card string to the deck file
+                    deckStream.Write(cardBytes, 0, cardBytes.Length);
                 }
 
                 if (File.Exists(deckPath))
-                    Logger.Info(namedLogSource, $"Generated deck file with {successfulCards} at '{deckPath}'.");
+                    Logger.Info(namedLogSource, $"Generated deck file containing {batchCards.Count} cards at '{deckPath}'.");
                 else
                     Logger.Error(namedLogSource, $"Unable to generate deck file at '{deckPath}'!");
             }
@@ -225,44 +203,54 @@ namespace HalfMagicProximity
             }
         }
 
+        public void AddCard(CardData card)
+        {
+            deckContents += GenerateCardString(card) + Environment.NewLine;
+        }
+
         /// <summary>
         /// Generates the decklist line for a given card
         /// </summary>
         private string GenerateCardString(CardData card)
         {
-            string OverrideTemplate = " --override=";
-            string cardString = $"1 {card.Name}";
-
-            // Add rarity override if one was specified in the config settings
-            if (ConfigManager.IsProxyRarityOverrided)
-                cardString += OverrideTemplate + "rarity:" + ConfigManager.ProxyRarityOverride;
-
-            // Add color overrides if faces have different colors
-            if (card.NeedsColorOverride)
+            if (card.ValidateCard())
             {
-                cardString += OverrideTemplate + "colors:[\"" + card.Color + "\"]";
-                cardString += OverrideTemplate + "proximity.mtg.color_count:" + card.ColorCount;
+                string OverrideTemplate = " --override=";
+                string cardString = $"1 {card.Name}";
+
+                // Add rarity override if one was specified in the config settings
+                if (ConfigManager.IsProxyRarityOverrided)
+                    cardString += OverrideTemplate + "rarity:" + ConfigManager.ProxyRarityOverride;
+
+                // Add color overrides if faces have different colors
+                if (card.NeedsColorOverride)
+                {
+                    cardString += OverrideTemplate + "colors:[\"" + card.Color + "\"]";
+                    cardString += OverrideTemplate + "proximity.mtg.color_count:" + card.ColorCount;
+                }
+
+                // Add watermark override if the card has one
+                if (card.NeedsWatermarkOverride)
+                    cardString += OverrideTemplate + "watermark:" + card.Watermark;
+
+                // Add artist override if faces have different artists
+                if (card.NeedsArtistOverride)
+                    cardString += OverrideTemplate + "artist:\"" + card.Artist + "\"";
+
+                // Back faces and split cards need manually overridden art
+                if (card.NeedsArtOverride)
+                {
+                    string artPath = Path.Combine(ConfigManager.ProximityDirectory, "art", card.ArtFileName).Replace("\\", "/").Replace(" ", "%20");
+
+                    cardString += OverrideTemplate + "image_uris.art_crop:\"\"file:///" + artPath + "\"\"";
+                }
+
+                Logger.Debug(namedLogSource, cardString);
+
+                return cardString;
             }
 
-            // Add watermark override if the card has one
-            if (card.NeedsWatermarkOverride)
-                cardString += OverrideTemplate + "watermark:" + card.Watermark;
-
-            // Add artist override if faces have different artists
-            if (card.NeedsArtistOverride)
-                cardString += OverrideTemplate + "artist:\"" + card.Artist + "\"";
-
-            // Back faces and split cards need manually overridden art
-            if (card.NeedsArtOverride)
-            {
-                string artPath = Path.Combine(ConfigManager.ProximityDirectory, "art", card.ArtFileName).Replace("\\", "/").Replace(" ", "%20");
-
-                cardString += OverrideTemplate + "image_uris.art_crop:\"\"file:///" + artPath + "\"\"";
-            }
-
-            Logger.Debug(namedLogSource, cardString);
-
-            return cardString;
+            return "";
         }
     }
 }
