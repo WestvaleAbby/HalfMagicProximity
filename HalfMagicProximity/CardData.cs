@@ -19,7 +19,6 @@
         public CardData OtherFace { private get; set; }
         public string Watermark { get; private set; }
         public string DisplayName => $"{Name} ({Layout} {Face})";
-        public string DisplayInfo => $"{DisplayName} | {Color} ({ColorCount} colors) | Artist: {Artist} | Art: '{ArtFileName}'";
 
         public bool NeedsColorOverride => Color != OtherFace.Color;
         public bool NeedsArtOverride => Face == CardFace.Back || Layout == CardLayout.Split;
@@ -83,13 +82,13 @@
             switch (color)
             {
                 case "UG":
-                    Logger.Debug(namedLogSource, $"Correcting color of '{DisplayName}' from UG to GU.");
+                    Logger.Trace(namedLogSource, $"Correcting color of '{DisplayName}' from UG to GU.");
                     return "GU";
                 case "WG":
-                    Logger.Debug(namedLogSource, $"Correcting color of '{DisplayName}' from WG to GW.");
+                    Logger.Trace(namedLogSource, $"Correcting color of '{DisplayName}' from WG to GW.");
                     return "GW";
                 case "WR":
-                    Logger.Debug(namedLogSource, $"Correcting color of '{DisplayName}' from WR to RW.");
+                    Logger.Trace(namedLogSource, $"Correcting color of '{DisplayName}' from WR to RW.");
                     return "RW";
                 default: 
                     return color;
@@ -97,7 +96,7 @@
         }
         public void CorrectArtist(string newArtist)
         {
-            Logger.Debug(LogSource + $": {Name}", $"Manually correcting artist of '{DisplayName}' from '{Artist}' to '{newArtist}'.");
+            Logger.Trace(LogSource + $": {Name}", $"Manually correcting artist of '{DisplayName}' from '{Artist}' to '{newArtist}'.");
             manualArtist = true;
             Artist = newArtist;
         }

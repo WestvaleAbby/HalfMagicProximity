@@ -75,7 +75,7 @@ namespace HalfMagicProximity
                 if (Cards.Count == 0)
                     Logger.Error(LogSource, "No legal cards found!");
                 else
-                    Logger.Info(LogSource, $"Found {Cards.Count} legal cards.");
+                    Logger.Debug(LogSource, $"Found {Cards.Count} legal cards.");
             }
             catch (FileNotFoundException e)
             {
@@ -123,21 +123,19 @@ namespace HalfMagicProximity
                     cardFaces[i].CorrectArtist(manualArtistOverride.Artist);
 
                 if (cardFaces[i].NeedsWatermarkOverride)
-                    Logger.Debug(LogSource, $"'{cardFaces[i].Name}' needs a watermark override for {cardFaces[i].Watermark}.");
+                    Logger.Trace(LogSource, $"'{cardFaces[i].Name}' needs a watermark override for {cardFaces[i].Watermark}.");
 
                 Cards.Add(cardFaces[i]);
 
-                if (Logger.IsDebugEnabled)
-                    Logger.Debug(LogSource, $"Added {cardFaces[i].DisplayInfo}");
-                else
-                    Logger.Info(LogSource, $"Added {cardFaces[i].DisplayName}");
+                Logger.Debug(LogSource, $"Added {cardFaces[i].DisplayName}");
+                Logger.Trace(LogSource, $" - {cardFaces[i].Color} ({cardFaces[i].ColorCount} colors) | Artist: {cardFaces[i].Artist} | Art: '{cardFaces[i].ArtFileName}'");
             }
 
             cardFaces[0].OtherFace = cardFaces[1];
             cardFaces[1].OtherFace = cardFaces[0];
 
             if (cardFaces[0].NeedsColorOverride)
-                Logger.Debug(LogSource, $"'{cardFaces[0].Name}' needs a color override: Front is {cardFaces[0].Color}, Back is {cardFaces[1].Color}.");
+                Logger.Trace(LogSource, $"'{cardFaces[0].Name}' needs a color override: Front is {cardFaces[0].Color}, Back is {cardFaces[1].Color}.");
 
             if (cardFaces[0].NeedsArtistOverride)
             {
@@ -145,9 +143,9 @@ namespace HalfMagicProximity
                 string backArtist = cardFaces[1].Artist;
 
                 if (frontArtist == backArtist)
-                    Logger.Debug(LogSource, $"'{cardFaces[0].Name}' needs an artist override since it was manually corrected.");
+                    Logger.Trace(LogSource, $"'{cardFaces[0].Name}' needs an artist override since it was manually corrected.");
                 else
-                    Logger.Debug(LogSource, $"'{cardFaces[0].Name}' needs an artist override: Front is '{cardFaces[0].Artist}', Back is '{cardFaces[1].Artist}'.");
+                    Logger.Trace(LogSource, $"'{cardFaces[0].Name}' needs an artist override: Front is '{cardFaces[0].Artist}', Back is '{cardFaces[1].Artist}'.");
             }
         }
 

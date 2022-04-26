@@ -37,7 +37,7 @@ namespace HalfMagicProximity
             else
                 proximityFile = prox;
 
-            Logger.Info(namedLogSource, $"{batchName} successfully created.");
+            Logger.Debug(namedLogSource, $"{batchName} successfully created.");
         }
 
         /// <summary>
@@ -53,7 +53,7 @@ namespace HalfMagicProximity
                 ready = VerifyProximityFiles();
 
             if (ready)
-                Logger.Info(namedLogSource, $"Fully intialized with {batchCards.Count} cards to render.");
+                Logger.Debug(namedLogSource, $"Fully intialized with {batchCards.Count} cards to render.");
             else
                 Logger.Error(namedLogSource, $"Failed to fully initialize!");
 
@@ -67,7 +67,7 @@ namespace HalfMagicProximity
         {
             if (Init())
             {
-                Logger.Info(namedLogSource, $"Beginning render.");
+                Logger.Trace(namedLogSource, $"Beginning render for {batchName}.");
 
                 Process proximityProcess = new Process();
                 ProcessStartInfo startInfo = new ProcessStartInfo(commandPath);
@@ -79,7 +79,7 @@ namespace HalfMagicProximity
                 proximityProcess.BeginOutputReadLine();
                 proximityProcess.WaitForExit();
 
-                Logger.Info(namedLogSource, $"Completed render.");
+                Logger.Trace(namedLogSource, $"Completed render for {batchName}.");
                 if (failedRenderCount > 0)
                     Logger.Warn(namedLogSource, $"Failed to render {failedRenderCount} cards.");
             }
@@ -105,7 +105,7 @@ namespace HalfMagicProximity
             // Check for the deck (that we presumably just made)
             if (File.Exists(deckPath))
             {
-                Logger.Info(namedLogSource, $"Deck file '{deckFile}' is present.");
+                Logger.Debug(namedLogSource, $"Deck file '{deckFile}' is present.");
             }
             else
             {
@@ -116,7 +116,7 @@ namespace HalfMagicProximity
             // Check for the proximity jar file
             if (File.Exists(proximityPath))
             {
-                Logger.Info(namedLogSource, $"Proximity file '{proximityFile}' is present.");
+                Logger.Debug(namedLogSource, $"Proximity file '{proximityFile}' is present.");
             }
             else
             {
@@ -127,7 +127,7 @@ namespace HalfMagicProximity
             // Check for the batch file to run
             if (File.Exists(commandPath))
             {
-                Logger.Info(namedLogSource, $"Batch file '{commandFile}' is present.");
+                Logger.Debug(namedLogSource, $"Batch file '{commandFile}' is present.");
             }
             else
             {
@@ -144,7 +144,7 @@ namespace HalfMagicProximity
         /// </summary>
         private void GenerateCommandFile()
         {
-            Logger.Debug(namedLogSource, $"Beginning to generate command file '{commandFile}'.");
+            Logger.Trace(namedLogSource, $"Beginning to generate command file '{commandFile}'.");
 
             try
             {
@@ -157,7 +157,7 @@ namespace HalfMagicProximity
                     commandStream.Write(commandBytes, 0, commandBytes.Length);
                 }
 
-                Logger.Info(namedLogSource, $"Command file successfully generated: {commandPath}");
+                Logger.Debug(namedLogSource, $"Command file successfully generated: {commandPath}");
             }
             catch (DirectoryNotFoundException e)
             {
@@ -176,7 +176,7 @@ namespace HalfMagicProximity
         /// </summary>
         private void GenerateDeckFile()
         {
-            Logger.Debug(namedLogSource, $"Beginning to generate decklist file '{deckFile}'.");
+            Logger.Trace(namedLogSource, $"Beginning to generate decklist file '{deckFile}'.");
 
             try
             {
@@ -189,7 +189,7 @@ namespace HalfMagicProximity
                 }
 
                 if (File.Exists(deckPath))
-                    Logger.Info(namedLogSource, $"Generated deck file containing {batchCards.Count} cards at '{deckPath}'.");
+                    Logger.Debug(namedLogSource, $"Generated deck file containing {batchCards.Count} cards at '{deckPath}'.");
                 else
                     Logger.Error(namedLogSource, $"Unable to generate deck file at '{deckPath}'!");
             }
@@ -245,7 +245,7 @@ namespace HalfMagicProximity
                     cardString += OverrideTemplate + "image_uris.art_crop:\"\"file:///" + artPath + "\"\"";
                 }
 
-                Logger.Debug(namedLogSource, cardString);
+                Logger.Trace(namedLogSource, cardString);
 
                 return cardString;
             }
