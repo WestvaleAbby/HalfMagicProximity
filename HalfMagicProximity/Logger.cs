@@ -6,13 +6,13 @@
         Warn,
         Error,
         Debug,
-        Trace
+        Trace,
         Prox,
     };
 
     static class Logger
     {
-        private const ConsoleColor InfoColor = ConsoleColor.White;
+        private const ConsoleColor InfoColor = ConsoleColor.DarkGreen;
         private const ConsoleColor WarnColor = ConsoleColor.Magenta;
         private const ConsoleColor ErrorColor = ConsoleColor.Red;
         private const ConsoleColor DebugColor = ConsoleColor.Gray;
@@ -97,7 +97,7 @@
         /// <param name="message">The message to output to the console</param>
         public static void Debug(string source, string message)
         {
-            Log(Severity.Error, source, message);
+            Log(Severity.Debug, source, message);
         }
 
         /// <summary>
@@ -111,7 +111,7 @@
             // Filter out debug messages if they're not being logged
             if (!IsTraceEnabled) return;
 
-            Log(Severity.Debug, source, message);
+            Log(Severity.Trace, source, message);
         }
 
         /// <summary>

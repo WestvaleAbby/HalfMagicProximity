@@ -18,12 +18,11 @@ namespace HalfMagicProximity
         private string proximityFile;
         private string proximityPath => Path.Combine(ConfigManager.ProximityDirectory, proximityFile);
 
-        private List<CardData> batchCards = new List<CardData>();
-        public int CardCount => batchCards.Count;
-        public bool IsFull => batchCards.Count >= MaxCardCount;
+        public int CardCount { get; private set; }
+        public bool IsFull => CardCount >= MaxCardCount;
 
         private string batchName;
-        public bool IsBatchFunctional => !string.IsNullOrEmpty(batchName) && !string.IsNullOrEmpty(proximityFile) && batchCards.Count > 0;
+        public bool IsBatchFunctional => !string.IsNullOrEmpty(batchName) && !string.IsNullOrEmpty(proximityFile) && CardCount > 0;
 
         public ProximityBatch(string name, string prox)
         {
@@ -53,7 +52,7 @@ namespace HalfMagicProximity
                 ready = VerifyProximityFiles();
 
             if (ready)
-                Logger.Debug(namedLogSource, $"Fully intialized with {batchCards.Count} cards to render.");
+                Logger.Debug(namedLogSource, $"Fully intialized with {CardCount} cards to render.");
             else
                 Logger.Error(namedLogSource, $"Failed to fully initialize!");
 
@@ -81,7 +80,7 @@ namespace HalfMagicProximity
 
                 Logger.Trace(namedLogSource, $"Completed render for {batchName}.");
                 if (failedRenderCount > 0)
-                    Logger.Warn(namedLogSource, $"Failed to render {failedRenderCount} cards.");
+                    Logger.Warn(namedLogSource, $"Failed to render {failedRenderCount} card{(failedRenderCount == 1 ? "" : "s")}.");
             }
         }
 
@@ -189,7 +188,7 @@ namespace HalfMagicProximity
                 }
 
                 if (File.Exists(deckPath))
-                    Logger.Debug(namedLogSource, $"Generated deck file containing {batchCards.Count} cards at '{deckPath}'.");
+                    Logger.Debug(namedLogSource, $"Generated deck file containing {CardCount} cards at '{deckPath}'.");
                 else
                     Logger.Error(namedLogSource, $"Unable to generate deck file at '{deckPath}'!");
             }
@@ -205,7 +204,13 @@ namespace HalfMagicProximity
 
         public void AddCard(CardData card)
         {
-            deckContents += GenerateCardString(card) + Environment.NewLine;
+            string cardString = GenerateCardString(card);
+
+            if (!string.IsNullOrEmpty(cardString))
+            {
+                deckContents += cardString + Environment.NewLine;
+                CardCount++;
+            }
         }
 
         /// <summary>

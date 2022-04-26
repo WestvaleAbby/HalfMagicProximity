@@ -25,17 +25,19 @@ namespace HalfMagicProximity
             while (processedCardCount < allCards.Count)
             {
                 string batchName = "batch" + batches.Count;
-                batches.Add(new ProximityBatch(batchName, ProximityJarName));
+                ProximityBatch thisBatch = new ProximityBatch(batchName, ProximityJarName);
+                batches.Add(thisBatch);
 
                 // Add cards to the most recently created batch until it's full, then create a new one
                 do
                 {
-                    batches.Last().AddCard(allCards[processedCardCount]);
+                    thisBatch.AddCard(allCards[processedCardCount]);
+                    Logger.Debug(LogSource, $"{allCards[processedCardCount].DisplayName} added to {batchName} ({thisBatch.CardCount}/{ProximityBatch.MaxCardCount}).");
                     processedCardCount++;
 
-                    Logger.Debug(LogSource, $"{allCards[processedCardCount].DisplayName} added to {batchName} ({processedCardCount}/{allCards.Count}).");
+                    Logger.Trace(LogSource, $"Processed {processedCardCount} out of {allCards.Count}.");
                 }
-                while (!batches.Last().IsFull && processedCardCount < allCards.Count);
+                while (!thisBatch.IsFull && processedCardCount < allCards.Count);
             }
 
             Logger.Info(LogSource, $"{batches.Count} batches successfully created.");
