@@ -18,6 +18,7 @@
         public CardLayout Layout { get; private set; }
         public CardData OtherFace { private get; set; }
         public string Watermark { get; private set; }
+        public string DisplayName => $"{Name} ({Layout} {Face})";
 
         public bool NeedsColorOverride => Color != OtherFace.Color;
         public bool NeedsArtOverride => Face == CardFace.Back || Layout == CardLayout.Split;
@@ -27,7 +28,7 @@
         public CardData(string name, string manaCost, string art, string artist, CardFace face, CardLayout layout, string watermark)
         {
             if (string.IsNullOrEmpty(name)) 
-                Logger.Warn("CardData", "Card object created with no name!");
+                Logger.Warn(LogSource, "Card object created with no name!");
             Name = name;
 
             if (string.IsNullOrEmpty(manaCost)) 
@@ -81,13 +82,13 @@
             switch (color)
             {
                 case "UG":
-                    Logger.Debug(namedLogSource, $"Correcting color of '{DisplayName}' from UG to GU.");
+                    Logger.Trace(namedLogSource, $"Correcting color of '{DisplayName}' from UG to GU.");
                     return "GU";
                 case "WG":
-                    Logger.Debug(namedLogSource, $"Correcting color of '{DisplayName}' from WG to GW.");
+                    Logger.Trace(namedLogSource, $"Correcting color of '{DisplayName}' from WG to GW.");
                     return "GW";
                 case "WR":
-                    Logger.Debug(namedLogSource, $"Correcting color of '{DisplayName}' from WR to RW.");
+                    Logger.Trace(namedLogSource, $"Correcting color of '{DisplayName}' from WR to RW.");
                     return "RW";
                 default: 
                     return color;
@@ -95,12 +96,46 @@
         }
         public void CorrectArtist(string newArtist)
         {
-            Logger.Debug(LogSource + $": {Name}", $"Manually correcting artist of '{DisplayName}' from '{Artist}' to '{newArtist}'.");
+            Logger.Trace(LogSource + $": {Name}", $"Manually correcting artist of '{DisplayName}' from '{Artist}' to '{newArtist}'.");
             manualArtist = true;
             Artist = newArtist;
         }
 
-        public string DisplayName => $"{Name} ({Layout} {Face})";
-        public string DisplayInfo => $"{DisplayName} | {Color} ({ColorCount} colors) | Artist: {Artist} | Art: '{ArtFileName}'";
+        public bool ValidateCard()
+        {
+            if (string.IsNullOrEmpty(Name))
+            {
+                Logger.Warn(LogSource, $"Card is missing name!");
+                return false;
+            }
+
+            if (NeedsColorOverride && Color.Length != ColorCount)
+            {
+                Logger.Warn(namedLogSource, $"Colors and color count for {Name} are mismatched: {Color}, {ColorCount}");
+                return false;
+            }
+
+            if (NeedsWatermarkOverride && string.IsNullOrEmpty(Watermark))
+            {
+                Logger.Warn(namedLogSource, $"Watermark is missing from {Watermark}");
+                return false;
+            }
+
+            if (NeedsArtistOverride && string.IsNullOrEmpty(Artist))
+            {
+                Logger.Warn(namedLogSource, $"Artist is missing from {Watermark}");
+                return false;
+            }
+
+            if (NeedsArtOverride && string.IsNullOrEmpty(ArtFileName))
+            {
+                Logger.Warn(namedLogSource, $"Art file is missing from {ArtFileName}");
+                return false;
+            }
+
+            Logger.Trace(namedLogSource, $"{Name} validated succesfully. No issues detected.");
+
+            return true;
+        }
     }
 }

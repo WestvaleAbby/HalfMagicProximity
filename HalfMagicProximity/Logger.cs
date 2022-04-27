@@ -6,22 +6,24 @@
         Warn,
         Error,
         Debug,
+        Trace,
         Prox,
     };
 
     static class Logger
     {
-        private const ConsoleColor INFO_COLOR = ConsoleColor.White;
-        private const ConsoleColor WARN_COLOR = ConsoleColor.Magenta;
-        private const ConsoleColor ERROR_COLOR = ConsoleColor.Red;
-        private const ConsoleColor DEBUG_COLOR = ConsoleColor.DarkGray;
-        private const ConsoleColor PROXIMITY_COLOR = ConsoleColor.Cyan;
-        private const ConsoleColor BACK_COLOR = ConsoleColor.Black;
+        private const ConsoleColor InfoColor = ConsoleColor.DarkGreen;
+        private const ConsoleColor WarnColor = ConsoleColor.Magenta;
+        private const ConsoleColor ErrorColor = ConsoleColor.Red;
+        private const ConsoleColor DebugColor = ConsoleColor.Gray;
+        private const ConsoleColor TraceColor = ConsoleColor.DarkGray;
+        private const ConsoleColor ProximityColor = ConsoleColor.Cyan;
+        private const ConsoleColor BackgroundColor = ConsoleColor.Black;
 
         private static ConsoleColor storedForegroundColor;
         private static ConsoleColor storedBackroundColor;
 
-        public static bool IsDebugEnabled { get; set; } = false;
+        public static bool IsTraceEnabled { get; set; } = false;
 
         static Logger ()
         {
@@ -33,27 +35,29 @@
         /// Logs a message to the console. Includes a date/time stamp and the severity, and changes the text color to indicate severity:
         /// yyyy-mm-dd hh:mm:ss|Severity|Message
         /// </summary>
-        /// <param name="severity">The log severity. Debug logs are only reported if IsDebugEnabled = true</param>
+        /// <param name="severity">The log severity. Trace logs are only reported if IsTraceEnabled = true</param>
         /// <param name="source">The source of the log message.</param>
         /// <param name="message">The message to output to the console</param>
         public static void Log(Severity severity, string source, string message)
         {
-            // Filter out debug messages if they're not being logged
-            if (severity == Severity.Debug && !IsDebugEnabled) return;
+            // Filter out trace messages if they're not being logged
+            if (severity == Severity.Trace && !IsTraceEnabled) return;
+
+            // Get the time stamp of the message and format it properly
+            string dateTimeStamp = String.Format("{0:s}", DateTime.Now).Replace('T', ' ');
 
             EnableSeverityColors(severity);
 
+            // ARGTODO: Output logging message to a log file
             // Most Proximity logs will already have the severity and source included, so we don't need to output it again
             if (severity == Severity.Prox && message.Contains("[Proximity]"))
             {
-                Console.WriteLine(message);
+                Console.WriteLine($"{dateTimeStamp} {message}");
             }
             else
             {
-                Console.WriteLine($"{severity,-5} [{source}] {message}");
+                Console.WriteLine($"{dateTimeStamp} {severity,-5} [{source}] {message}");
             }
-            
-            // ARGTODO: Output logging message to a log file
 
             RestoreDefaultColors();
         }
@@ -89,14 +93,27 @@
         }
 
         /// <summary>
-        /// Log a message at the Debug severity. Text is Grey.
-        /// Only logged if IsDebugEnabled = true 
+        /// Log a message at the Debug severity. Text is Grey
         /// </summary>
         /// <param name="source">The source of the log message.</param>
         /// <param name="message">The message to output to the console</param>
         public static void Debug(string source, string message)
         {
             Log(Severity.Debug, source, message);
+        }
+
+        /// <summary>
+        /// Log a message at the Trace severity. Text is Dark Grey.
+        /// Only logged if IsTraceEnabled = true 
+        /// </summary>
+        /// <param name="source">The source of the log message.</param>
+        /// <param name="message">The message to output to the console</param>
+        public static void Trace(string source, string message)
+        {
+            // Filter out debug messages if they're not being logged
+            if (!IsTraceEnabled) return;
+
+            Log(Severity.Trace, source, message);
         }
 
         /// <summary>
@@ -111,24 +128,27 @@
 
         private static void EnableSeverityColors(Severity severity)
         {
-            Console.BackgroundColor = BACK_COLOR;
+            Console.BackgroundColor = BackgroundColor;
 
             switch (severity)
             {
                 case Severity.Info:
-                    Console.ForegroundColor = INFO_COLOR;
+                    Console.ForegroundColor = InfoColor;
                     break;
                 case Severity.Warn:
-                    Console.ForegroundColor = WARN_COLOR;
+                    Console.ForegroundColor = WarnColor;
                     break;
                 case Severity.Error:
-                    Console.ForegroundColor = ERROR_COLOR;
+                    Console.ForegroundColor = ErrorColor;
                     break;
                 case Severity.Debug:
-                    Console.ForegroundColor = DEBUG_COLOR;
+                    Console.ForegroundColor = DebugColor;
+                    break;
+                case Severity.Trace:
+                    Console.ForegroundColor = TraceColor;
                     break;
                 case Severity.Prox:
-                    Console.ForegroundColor = PROXIMITY_COLOR;
+                    Console.ForegroundColor = ProximityColor;
                     break;
             }
         }

@@ -23,7 +23,7 @@ namespace HalfMagicProximity
                         return;
                     }
 
-                    Logger.Debug(LogSource, $"Filtering {root.GetArrayLength()} cards.");
+                    Logger.Info(LogSource, $"Filtering {root.GetArrayLength()} cards. This may take several minutes, please do not close this window!");
                     for (int i = 0; i < root.GetArrayLength(); i++)
                     {
                         JsonElement node = root[i];
@@ -75,7 +75,7 @@ namespace HalfMagicProximity
                 if (Cards.Count == 0)
                     Logger.Error(LogSource, "No legal cards found!");
                 else
-                    Logger.Info(LogSource, $"There are {Cards.Count} legal cards.");
+                    Logger.Debug(LogSource, $"Found {Cards.Count} legal cards.");
             }
             catch (FileNotFoundException e)
             {
@@ -95,8 +95,8 @@ namespace HalfMagicProximity
         {
             string name = GetCardProperty(jsonCard, CardProperty.Name);
 
-            // Only add cards in the debug card list if we're using that subset of cards
-            if (ConfigManager.UseDebugCardSubset && !ConfigManager.DebugCards.Contains(name.ToLower())) return;
+            // Only add cards in the specified card list if we're using that subset of cards
+            if (ConfigManager.UseCardSubset && !ConfigManager.CardSubset.Contains(name.ToLower())) return;
 
             CardLayout layout = GetCardLayout(GetCardProperty(jsonCard, CardProperty.Layout));
 
@@ -123,17 +123,19 @@ namespace HalfMagicProximity
                     cardFaces[i].CorrectArtist(manualArtistOverride.Artist);
 
                 if (cardFaces[i].NeedsWatermarkOverride)
-                    Logger.Debug(LogSource, $"'{cardFaces[i].Name}' needs a watermark override for {cardFaces[i].Watermark}.");
+                    Logger.Trace(LogSource, $"'{cardFaces[i].Name}' needs a watermark override for {cardFaces[i].Watermark}.");
 
                 Cards.Add(cardFaces[i]);
-                Logger.Debug(LogSource, $"Added {cardFaces[i].DisplayInfo}");
+
+                Logger.Debug(LogSource, $"Added {cardFaces[i].DisplayName}");
+                Logger.Trace(LogSource, $" - {cardFaces[i].Color} ({cardFaces[i].ColorCount} colors) | Artist: {cardFaces[i].Artist} | Art: '{cardFaces[i].ArtFileName}'");
             }
 
             cardFaces[0].OtherFace = cardFaces[1];
             cardFaces[1].OtherFace = cardFaces[0];
 
             if (cardFaces[0].NeedsColorOverride)
-                Logger.Debug(LogSource, $"'{cardFaces[0].Name}' needs a color override: Front is {cardFaces[0].Color}, Back is {cardFaces[1].Color}.");
+                Logger.Trace(LogSource, $"'{cardFaces[0].Name}' needs a color override: Front is {cardFaces[0].Color}, Back is {cardFaces[1].Color}.");
 
             if (cardFaces[0].NeedsArtistOverride)
             {
@@ -141,9 +143,9 @@ namespace HalfMagicProximity
                 string backArtist = cardFaces[1].Artist;
 
                 if (frontArtist == backArtist)
-                    Logger.Debug(LogSource, $"'{cardFaces[0].Name}' needs an artist override since it was manually corrected.");
+                    Logger.Trace(LogSource, $"'{cardFaces[0].Name}' needs an artist override since it was manually corrected.");
                 else
-                    Logger.Debug(LogSource, $"'{cardFaces[0].Name}' needs an artist override: Front is '{cardFaces[0].Artist}', Back is '{cardFaces[1].Artist}'.");
+                    Logger.Trace(LogSource, $"'{cardFaces[0].Name}' needs an artist override: Front is '{cardFaces[0].Artist}', Back is '{cardFaces[1].Artist}'.");
             }
         }
 
@@ -163,7 +165,8 @@ namespace HalfMagicProximity
             string[] nameSubstrings = name.Split('/');
             int index = (face == CardFace.Front ? 0 : nameSubstrings.Length - 1);
 
-            return nameSubstrings[index].Replace(" ", "").ToLower() + ConfigManager.ArtFileExtension;
+            // ARGTODO: Use some regex if these replacements need to be expanded further
+            return nameSubstrings[index].Replace(" ", "").Replace("'", "").ToLower() + ConfigManager.ArtFileExtension;
         }
 
         // Extract the value of a json element's property as a string

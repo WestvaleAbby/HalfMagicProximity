@@ -21,8 +21,8 @@ namespace HalfMagicProximity
 
         public static List<string> IllegalSetCodes = new List<string>();
 
-        public static bool UseDebugCardSubset;
-        public static List<string> DebugCards = new List<string>();
+        public static bool UseCardSubset;
+        public static List<string> CardSubset = new List<string>();
 
         public static List<ManualArtistOverride> ManualArtistOverrides = new List<ManualArtistOverride>();
 
@@ -45,13 +45,13 @@ namespace HalfMagicProximity
                 {
                     JsonElement configOptions = configDoc.RootElement.GetProperty("hlfOptions");
 
-                    ParseIsDebugEnabled(configOptions);
+                    ParseIsTraceEnabled(configOptions);
                     if (!ParsePaths(configOptions)) return;
                     ParseArtExtension(configOptions);
                     ParseRarityOverride(configOptions);
                     ParseProxyCleanup(configOptions);
                     ParseIllegalSetCodes(configOptions);
-                    ParseDebugCardSet(configOptions);
+                    ParseCardSubset(configOptions);
                     ParseManualArtistOverrides(configOptions);
                 }
             }
@@ -70,15 +70,15 @@ namespace HalfMagicProximity
         }
 
         /// <summary>
-        /// Determine whether debug logs are displayed
+        /// Determine whether trace logs are displayed
         /// </summary>
-        private static void ParseIsDebugEnabled(JsonElement configOptions)
+        private static void ParseIsTraceEnabled(JsonElement configOptions)
         {
-            Logger.IsDebugEnabled = configOptions.GetProperty("IsDebugEnabled").GetBoolean();
-            if (Logger.IsDebugEnabled)
-                Logger.Info(LogSource, $"Debug messages are enabled.");
+            Logger.IsTraceEnabled = configOptions.GetProperty("IsTraceEnabled").GetBoolean();
+            if (Logger.IsTraceEnabled)
+                Logger.Debug(LogSource, $"Trace messages are enabled.");
             else
-                Logger.Info(LogSource, $"Debug messages are disabled.");
+                Logger.Debug(LogSource, $"Trace messages are disabled.");
         }
 
         /// <summary>
@@ -101,7 +101,7 @@ namespace HalfMagicProximity
             else
             {
                 ScryfallPath = scryfallString;
-                Logger.Info(LogSource, $"Scryfall path pulled from config: '{ScryfallPath}'.");
+                Logger.Debug(LogSource, $"Scryfall path pulled from config: '{ScryfallPath}'.");
             }
 
             // Find path to proximity files
@@ -119,7 +119,7 @@ namespace HalfMagicProximity
             else
             {
                 ProximityDirectory = proximityString;
-                Logger.Info(LogSource, $"Proximity directory pulled from config: '{ProximityDirectory}'.");
+                Logger.Debug(LogSource, $"Proximity directory pulled from config: '{ProximityDirectory}'.");
             }
 
             return true;
@@ -138,7 +138,7 @@ namespace HalfMagicProximity
             }
             else
             {
-                Logger.Info(LogSource, $"Art file extension pulled from config: '{ArtFileExtension}'.");
+                Logger.Debug(LogSource, $"Art file extension pulled from config: '{ArtFileExtension}'.");
             }
         }
 
@@ -150,7 +150,7 @@ namespace HalfMagicProximity
             ProxyRarityOverride = configOptions.GetProperty("ProxyRarityOverride").GetString().ToLower();
             if (string.IsNullOrEmpty(ProxyRarityOverride))
             {
-                Logger.Info(LogSource, $"No proxy rarity override supplied. Using card defaults from Scryfall.");
+                Logger.Debug(LogSource, $"No proxy rarity override supplied. Using card defaults from Scryfall.");
             }
             else if (!validRarities.Contains(ProxyRarityOverride))
             {
@@ -159,7 +159,7 @@ namespace HalfMagicProximity
             }
             else
             {
-                Logger.Info(LogSource, $"Proxy rarity override pulled from config: '{ProxyRarityOverride}'.");
+                Logger.Debug(LogSource, $"Proxy rarity override pulled from config: '{ProxyRarityOverride}'.");
             }
         }
 
@@ -170,7 +170,7 @@ namespace HalfMagicProximity
         {
             DeleteBadFaces = configOptions.GetProperty("DeleteBadFaces").GetBoolean();
             if (DeleteBadFaces)
-                Logger.Info(LogSource, $"Bad proxy faces will be deleted once all proxies have been rendered.");
+                Logger.Debug(LogSource, $"Bad proxy faces will be deleted once all proxies have been rendered.");
             else
                 Logger.Warn(LogSource, $"Bad proxy faces will not be automatically deleted.");
         }
@@ -185,40 +185,44 @@ namespace HalfMagicProximity
             for (int i = 0; i < illegalSetCodeElement.GetArrayLength(); i++)
             {
                 IllegalSetCodes.Add(illegalSetCodeElement[i].ToString().ToLower());
-                Logger.Info(LogSource, $"Added {IllegalSetCodes[i]} to list of illegal sets.");
+                Logger.Trace(LogSource, $"Added {IllegalSetCodes[i]} to list of illegal sets.");
             }
+
+            Logger.Debug(LogSource, $"Loaded {IllegalSetCodes.Count} illegal sets.");
         }
 
         /// <summary>
-        /// Determine whether we're using the full card list, or only the debug cards
+        /// Determine whether we're using the full card list, or only the subset in the config file
         /// </summary>
-        private static void ParseDebugCardSet(JsonElement configOptions)
+        private static void ParseCardSubset(JsonElement configOptions)
         {
-            UseDebugCardSubset = configOptions.GetProperty("UseDebugCardSubset").GetBoolean();
-            if (UseDebugCardSubset)
+            UseCardSubset = configOptions.GetProperty("UseCardSubset").GetBoolean();
+            if (UseCardSubset)
             {
-                Logger.Warn(LogSource, $"Not using the full format, only the debug subset!");
+                Logger.Warn(LogSource, $"Not using the full format, only the subset specified in the config file!");
 
-                DebugCards.Clear();
-                JsonElement debugCardElement = configOptions.GetProperty("DebugCards");
-                for (int i = 0; i < debugCardElement.GetArrayLength(); i++)
+                CardSubset.Clear();
+                JsonElement cardSubsetElement = configOptions.GetProperty("CardSubset");
+                for (int i = 0; i < cardSubsetElement.GetArrayLength(); i++)
                 {
-                    string debugCard = debugCardElement[i].ToString().ToLower();
+                    string specifiedCard = cardSubsetElement[i].ToString().ToLower();
 
-                    if (!debugCard.Contains("//"))
+                    if (!specifiedCard.Contains("//"))
                     {
-                        Logger.Warn(LogSource, $"Debug card '{debugCard}' does not have '//'. Please double check that you have the full card name.");
+                        Logger.Warn(LogSource, $"Specified card '{specifiedCard}' does not have '//'. Please double check that you have the full card name.");
                     }
                     else
                     {
-                        DebugCards.Add(debugCard);
-                        Logger.Info(LogSource, $"Added '{DebugCards.Last()}' to list of debug cards.");
+                        CardSubset.Add(specifiedCard);
+                        Logger.Trace(LogSource, $"Added '{CardSubset.Last()}' to list of specified cards.");
                     }
                 }
+
+                Logger.Debug(LogSource, $"Loaded {CardSubset.Count} specified cards.");
             }
             else
             {
-                Logger.Info(LogSource, $"Using all legal cards.");
+                Logger.Debug(LogSource, $"Using all legal cards.");
             }
         }
 
@@ -264,8 +268,10 @@ namespace HalfMagicProximity
                     Logger.Warn(LogSource, $"Manual artist override for '{card}' has its face improperly specified. Defaulting to 'Back'.");
 
                 ManualArtistOverrides.Add(new ManualArtistOverride(card, face, artist));
-                Logger.Info(LogSource, $"Added '{ManualArtistOverrides.Last().CardName}' to list of artist overrides.");
+                Logger.Trace(LogSource, $"Added '{ManualArtistOverrides.Last().CardName}' to list of artist overrides.");
             }
+
+            Logger.Debug(LogSource, $"Loaded {ManualArtistOverrides.Count} manual artist overrides.");
         }
     }
 
