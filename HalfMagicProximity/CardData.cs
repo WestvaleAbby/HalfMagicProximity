@@ -133,6 +133,8 @@
                 return false;
             }
 
+            Logger.Trace(namedLogSource, $"{Name} validated succesfully. No issues detected.");
+
             return true;
         }
     }

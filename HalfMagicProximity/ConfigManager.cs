@@ -21,8 +21,8 @@ namespace HalfMagicProximity
 
         public static List<string> IllegalSetCodes = new List<string>();
 
-        public static bool UseDebugCardSubset;
-        public static List<string> DebugCards = new List<string>();
+        public static bool UseCardSubset;
+        public static List<string> CardSubset = new List<string>();
 
         public static List<ManualArtistOverride> ManualArtistOverrides = new List<ManualArtistOverride>();
 
@@ -51,7 +51,7 @@ namespace HalfMagicProximity
                     ParseRarityOverride(configOptions);
                     ParseProxyCleanup(configOptions);
                     ParseIllegalSetCodes(configOptions);
-                    ParseDebugCardSet(configOptions);
+                    ParseCardSubset(configOptions);
                     ParseManualArtistOverrides(configOptions);
                 }
             }
@@ -192,33 +192,33 @@ namespace HalfMagicProximity
         }
 
         /// <summary>
-        /// Determine whether we're using the full card list, or only the debug cards
+        /// Determine whether we're using the full card list, or only the subset in the config file
         /// </summary>
-        private static void ParseDebugCardSet(JsonElement configOptions)
+        private static void ParseCardSubset(JsonElement configOptions)
         {
-            UseDebugCardSubset = configOptions.GetProperty("UseDebugCardSubset").GetBoolean();
-            if (UseDebugCardSubset)
+            UseCardSubset = configOptions.GetProperty("UseCardSubset").GetBoolean();
+            if (UseCardSubset)
             {
-                Logger.Warn(LogSource, $"Not using the full format, only the debug subset!");
+                Logger.Warn(LogSource, $"Not using the full format, only the subset specified in the config file!");
 
-                DebugCards.Clear();
-                JsonElement debugCardElement = configOptions.GetProperty("DebugCards");
-                for (int i = 0; i < debugCardElement.GetArrayLength(); i++)
+                CardSubset.Clear();
+                JsonElement cardSubsetElement = configOptions.GetProperty("CardSubset");
+                for (int i = 0; i < cardSubsetElement.GetArrayLength(); i++)
                 {
-                    string debugCard = debugCardElement[i].ToString().ToLower();
+                    string specifiedCard = cardSubsetElement[i].ToString().ToLower();
 
-                    if (!debugCard.Contains("//"))
+                    if (!specifiedCard.Contains("//"))
                     {
-                        Logger.Warn(LogSource, $"Debug card '{debugCard}' does not have '//'. Please double check that you have the full card name.");
+                        Logger.Warn(LogSource, $"Specified card '{specifiedCard}' does not have '//'. Please double check that you have the full card name.");
                     }
                     else
                     {
-                        DebugCards.Add(debugCard);
-                        Logger.Trace(LogSource, $"Added '{DebugCards.Last()}' to list of debug cards.");
+                        CardSubset.Add(specifiedCard);
+                        Logger.Trace(LogSource, $"Added '{CardSubset.Last()}' to list of specified cards.");
                     }
                 }
 
-                Logger.Debug(LogSource, $"Loaded {DebugCards.Count} debug cards.");
+                Logger.Debug(LogSource, $"Loaded {CardSubset.Count} specified cards.");
             }
             else
             {

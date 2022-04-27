@@ -95,8 +95,8 @@ namespace HalfMagicProximity
         {
             string name = GetCardProperty(jsonCard, CardProperty.Name);
 
-            // Only add cards in the debug card list if we're using that subset of cards
-            if (ConfigManager.UseDebugCardSubset && !ConfigManager.DebugCards.Contains(name.ToLower())) return;
+            // Only add cards in the specified card list if we're using that subset of cards
+            if (ConfigManager.UseCardSubset && !ConfigManager.CardSubset.Contains(name.ToLower())) return;
 
             CardLayout layout = GetCardLayout(GetCardProperty(jsonCard, CardProperty.Layout));
 

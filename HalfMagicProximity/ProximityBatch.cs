@@ -6,13 +6,13 @@ namespace HalfMagicProximity
     public class ProximityBatch
     {
         private const string LogSource = "Batch";
-        private string namedLogSource => $"{LogSource}: {batchName}";
+        private string namedLogSource => $"{LogSource}: {name}";
         public const int MaxCardCount = 20; // Should be even so both halves of a card end up in the same batch
 
-        private string deckFile => batchName + "_decklist.txt";
+        private string deckFile => name + "_decklist.txt";
         private string deckPath => Path.Combine(ConfigManager.ProximityDirectory, deckFile);
 
-        private string commandFile => batchName + "_proximityCommand.bat";
+        private string commandFile => name + "_proximityCommand.bat";
         private string commandPath => Path.Combine(ConfigManager.ProximityDirectory, commandFile);
 
         private string proximityFile;
@@ -21,22 +21,22 @@ namespace HalfMagicProximity
         public int CardCount { get; private set; }
         public bool IsFull => CardCount >= MaxCardCount;
 
-        private string batchName;
-        public bool IsBatchFunctional => !string.IsNullOrEmpty(batchName) && !string.IsNullOrEmpty(proximityFile) && CardCount > 0;
+        private string name;
+        public bool IsBatchFunctional => !string.IsNullOrEmpty(name) && !string.IsNullOrEmpty(proximityFile) && CardCount > 0;
 
         public ProximityBatch(string name, string prox)
         {
             if (string.IsNullOrEmpty(name))
                 Logger.Error(LogSource, $"No batch name provided. Unable to run proximity without a batch name!");
             else
-                batchName = name;
+                this.name = name;
 
             if (string.IsNullOrEmpty(prox))
                 Logger.Error(namedLogSource, $"No proximity file provided. Unable to run proximity without the jar file!");
             else
                 proximityFile = prox;
 
-            Logger.Debug(namedLogSource, $"{batchName} successfully created.");
+            Logger.Debug(namedLogSource, $"{this.name} successfully created.");
         }
 
         /// <summary>
@@ -52,7 +52,7 @@ namespace HalfMagicProximity
                 ready = VerifyProximityFiles();
 
             if (ready)
-                Logger.Debug(namedLogSource, $"Fully intialized with {CardCount} cards to render.");
+                Logger.Debug(namedLogSource, $"Fully intialized with {CardCount} cards ({CardCount * 2} faces) to render.");
             else
                 Logger.Error(namedLogSource, $"Failed to fully initialize!");
 
@@ -66,7 +66,7 @@ namespace HalfMagicProximity
         {
             if (Init())
             {
-                Logger.Trace(namedLogSource, $"Beginning render for {batchName}.");
+                Logger.Trace(namedLogSource, $"Beginning render for {name}.");
 
                 Process proximityProcess = new Process();
                 ProcessStartInfo startInfo = new ProcessStartInfo(commandPath);
@@ -78,7 +78,7 @@ namespace HalfMagicProximity
                 proximityProcess.BeginOutputReadLine();
                 proximityProcess.WaitForExit();
 
-                Logger.Trace(namedLogSource, $"Completed render for {batchName}.");
+                Logger.Trace(namedLogSource, $"Completed render for {name}.");
                 if (failedRenderCount > 0)
                     Logger.Warn(namedLogSource, $"Failed to render {failedRenderCount} card{(failedRenderCount == 1 ? "" : "s")}.");
             }
@@ -176,6 +176,12 @@ namespace HalfMagicProximity
         private void GenerateDeckFile()
         {
             Logger.Trace(namedLogSource, $"Beginning to generate decklist file '{deckFile}'.");
+
+            if (string.IsNullOrEmpty(deckContents))
+            {
+                Logger.Error(namedLogSource, $"Deck contents are empty, unable to generate deck file!");
+                return;
+            }
 
             try
             {

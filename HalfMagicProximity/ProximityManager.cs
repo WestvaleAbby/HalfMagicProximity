@@ -5,7 +5,8 @@ namespace HalfMagicProximity
     public class ProximityManager
     {
         private const string LogSource = "ProximityManager";
-        private const string ProximityJarName = "proximity-0.6.2.jar";
+        private const string ProximityFileName = "proximity-0.6.2.jar";
+        private const string BatchNameBase = "hlf_";
 
         private List<CardData> allCards;
         private List<ProximityBatch> batches = new List<ProximityBatch>();
@@ -24,8 +25,8 @@ namespace HalfMagicProximity
 
             while (processedCardCount < allCards.Count)
             {
-                string batchName = "batch" + batches.Count;
-                ProximityBatch thisBatch = new ProximityBatch(batchName, ProximityJarName);
+                string batchName = BatchNameBase + batches.Count;
+                ProximityBatch thisBatch = new ProximityBatch(batchName, ProximityFileName);
                 batches.Add(thisBatch);
 
                 // Add cards to the most recently created batch until it's full, then create a new one
@@ -44,7 +45,7 @@ namespace HalfMagicProximity
 
             for (int i = 0; i < batches.Count; i++)
             {
-                Logger.Info(LogSource, $"Running batch {i + 1} of {batches.Count}.");
+                Logger.Info(LogSource, $"Rendering batch {i + 1} of {batches.Count}.");
                 batches[i].Run();
                 Logger.Info(LogSource, $"Completed batch {i + 1} of {batches.Count}.");
             }
