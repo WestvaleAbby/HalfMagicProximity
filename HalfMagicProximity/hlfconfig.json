@@ -7,7 +7,7 @@
 		"ProxyRarityOverride": "uncommon",
 		"DeleteBadFaces": false,
 		"IllegalSetCodes": [ "htr", "cmb" ],
-		"UseDebugCardSubset": true,
+		"UseDebugCardSubset": false,
 		"DebugCards": [
 			"Alive // Well",
 			"Fae of Wishes // Granted",
@@ -126,7 +126,7 @@
 				"artist": "John Severin Brassell"
 			},
 			{
-				"card": "Merfolk Secret Keeper // Venture Deeper",
+				"card": "Merfolk Secretkeeper // Venture Deeper",
 				"face": "Back",
 				"artist": "Allen Williams"
 			},

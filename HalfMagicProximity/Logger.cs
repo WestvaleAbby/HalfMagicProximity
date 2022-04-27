@@ -43,16 +43,19 @@
             // Filter out trace messages if they're not being logged
             if (severity == Severity.Trace && !IsTraceEnabled) return;
 
+            // Get the time stamp of the message and format it properly
+            string dateTimeStamp = String.Format("{0:s}", DateTime.Now).Replace('T', ' ');
+
             EnableSeverityColors(severity);
 
             // Most Proximity logs will already have the severity and source included, so we don't need to output it again
             if (severity == Severity.Prox && message.Contains("[Proximity]"))
             {
-                Console.WriteLine(message);
+                Console.WriteLine($"{dateTimeStamp} {message}");
             }
             else
             {
-                Console.WriteLine($"{severity,-5} [{source}] {message}");
+                Console.WriteLine($"{dateTimeStamp} {severity,-5} [{source}] {message}");
             }
             
             // ARGTODO: Output logging message to a log file
