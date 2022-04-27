@@ -33,7 +33,6 @@ namespace HalfMagicProximity
                 do
                 {
                     thisBatch.AddCard(allCards[processedCardCount]);
-                    Logger.Debug(LogSource, $"{allCards[processedCardCount].DisplayName} added to {batchName} ({thisBatch.CardCount}/{ProximityBatch.MaxCardCount}).");
                     processedCardCount++;
 
                     Logger.Trace(LogSource, $"Processed {processedCardCount} out of {allCards.Count}.");

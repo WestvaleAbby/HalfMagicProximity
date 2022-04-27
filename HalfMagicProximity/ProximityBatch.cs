@@ -36,7 +36,7 @@ namespace HalfMagicProximity
             else
                 proximityFile = prox;
 
-            Logger.Debug(namedLogSource, $"{this.name} successfully created.");
+            Logger.Debug(namedLogSource, $"Batch {this.name} successfully created.");
         }
 
         /// <summary>
@@ -60,7 +60,7 @@ namespace HalfMagicProximity
         }
 
         /// <summary>
-        /// Verify that the batch is operational, then run the proximity file
+        /// Initialize the batch, then run the proximity file
         /// </summary>
         public void Run()
         {
@@ -149,6 +149,7 @@ namespace HalfMagicProximity
             {
                 using (FileStream commandStream = File.Create(commandPath))
                 {
+                    // ARGTODO: Include RAM allocation override (-Xmx8g) after 'java'?
                     string templatePath = Path.Combine(ConfigManager.ProximityDirectory, "templates", "hlf.zip").Replace("\\", "\\\\");
                     string commandString = $"java -jar \"{proximityPath}\" --template=\"{templatePath}\" --cards=\"{deckPath.Replace("\\", "\\\\")}\" --art_source=BEST --set_symbol=jmp --use_card_back=true";
                     byte[] commandBytes = new UTF8Encoding(true).GetBytes(commandString);
@@ -188,8 +189,6 @@ namespace HalfMagicProximity
                 using (FileStream deckStream = File.Create(deckPath))
                 {
                     byte[] cardBytes = new UTF8Encoding(true).GetBytes(deckContents);
-
-                    // Write card string to the deck file
                     deckStream.Write(cardBytes, 0, cardBytes.Length);
                 }
 
@@ -216,6 +215,8 @@ namespace HalfMagicProximity
             {
                 deckContents += cardString + Environment.NewLine;
                 CardCount++;
+
+                Logger.Debug(namedLogSource, $"{card.DisplayName} added to batch ({CardCount}/{MaxCardCount}).");
             }
         }
 

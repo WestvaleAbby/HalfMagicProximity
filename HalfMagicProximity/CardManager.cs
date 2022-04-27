@@ -165,6 +165,7 @@ namespace HalfMagicProximity
             string[] nameSubstrings = name.Split('/');
             int index = (face == CardFace.Front ? 0 : nameSubstrings.Length - 1);
 
+            // ARGTODO: Use some regex if these replacements need to be expanded further
             return nameSubstrings[index].Replace(" ", "").Replace("'", "").ToLower() + ConfigManager.ArtFileExtension;
         }
 
