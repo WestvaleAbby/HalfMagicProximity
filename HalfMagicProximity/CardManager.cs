@@ -127,7 +127,7 @@ namespace HalfMagicProximity
 
                 Cards.Add(cardFaces[i]);
 
-                Logger.Debug(LogSource, $"Added {cardFaces[i].DisplayName}");
+                Logger.Debug(LogSource, $"{cardFaces[i].DisplayName} is legal.");
                 Logger.Trace(LogSource, $" - {cardFaces[i].Color} ({cardFaces[i].ColorCount} colors) | Artist: {cardFaces[i].Artist} | Art: '{cardFaces[i].ArtFileName}'");
             }
 
