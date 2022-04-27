@@ -9,6 +9,10 @@ namespace HalfMagicProximity
         private string namedLogSource => $"{LogSource}: {name}";
         public const int MaxCardCount = 20; // Should be even so both halves of a card end up in the same batch
 
+        private ProximityManager manager;
+
+        private string name;
+
         private string deckFile => name + "_decklist.txt";
         private string deckPath => Path.Combine(ConfigManager.ProximityDirectory, deckFile);
 
@@ -20,12 +24,12 @@ namespace HalfMagicProximity
 
         public int CardCount { get; private set; }
         public bool IsFull => CardCount >= MaxCardCount;
-
-        private string name;
         public bool IsBatchFunctional => !string.IsNullOrEmpty(name) && !string.IsNullOrEmpty(proximityFile) && CardCount > 0;
 
-        public ProximityBatch(string name, string prox)
+        public ProximityBatch(ProximityManager manager, string name, string prox)
         {
+            this.manager = manager ?? throw new ArgumentNullException(nameof(manager));
+
             if (string.IsNullOrEmpty(name))
                 Logger.Error(LogSource, $"No batch name provided. Unable to run proximity without a batch name!");
             else
@@ -91,8 +95,25 @@ namespace HalfMagicProximity
             {
                 Logger.Proximity("Proximity", args.Data.Replace(Environment.NewLine, ""));
 
-                if (args.Data.Contains("FAILED"))
+                if (args.Data.ToLower().Contains("failed"))
+                {
                     failedRenderCount++;
+
+                    string[] splitArgs = args.Data.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+
+                    // Format is 'Severity [Proximity] X/YY ZZZZms Name                 FAILED'
+                    if (splitArgs.Length >= 5)
+                    {
+                        // Name will comprise the fourth through second to last substring
+                        string failedCardName = "";
+                        for (int i = 4; i < splitArgs.Length - 1; i++)
+                            failedCardName += splitArgs[i] + " ";
+
+                        manager.HandleFailedRender(failedCardName.Trim());
+                    }
+                    else
+                        Logger.Error(namedLogSource, $"Unable to determine name for failed card render. Cannot try again!");
+                }
             }
         }
 
