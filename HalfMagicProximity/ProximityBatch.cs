@@ -214,7 +214,7 @@ namespace HalfMagicProximity
                 }
 
                 if (File.Exists(deckPath))
-                    Logger.Trace(namedLogSource, $"Deck file containing {CardCount} cards successfully generatedat: {deckPath}");
+                    Logger.Trace(namedLogSource, $"Deck file containing {CardCount} cards successfully generated at: {deckPath}");
                 else
                     Logger.Error(namedLogSource, $"Unable to generate deck file at '{deckPath}'!");
             }
