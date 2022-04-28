@@ -3,12 +3,16 @@
     public enum CardFace { Front, Back };
     public enum CardLayout { Split, Adventure, None };
 
+    /// <summary>
+    /// A card pulled from the Scryfall JSON
+    /// </summary>
     public class CardData
     {
         private const string LogSource = "Card";
         private string namedLogSource => $"{LogSource}: {Name}";
 
         public string Name { get; private set; }
+        public string DisplayName { get; private set; }
         public string Color { get; private set; }
         public int ColorCount { get; private set; }
         public string ArtFileName { get; private set; }
@@ -18,7 +22,6 @@
         public CardLayout Layout { get; private set; }
         public CardData OtherFace { private get; set; }
         public string Watermark { get; private set; }
-        public string DisplayName => $"{Name} ({Layout} {Face})";
 
         public bool NeedsColorOverride => Color != OtherFace.Color;
         public bool NeedsArtOverride => Face == CardFace.Back || Layout == CardLayout.Split;
@@ -51,6 +54,11 @@
 
             // Don't need to check if watermark is empty, empty indicates no watermark
             Watermark = watermark;
+
+            if (Face == CardFace.Front)
+                DisplayName = Name.Split(" // ").First().Trim();
+            else 
+                DisplayName = Name.Split(" // ").Last().Trim();
         }
 
         /// <summary>

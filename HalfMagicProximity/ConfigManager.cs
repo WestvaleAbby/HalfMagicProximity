@@ -3,6 +3,9 @@ using System.Text.Json;
 
 namespace HalfMagicProximity
 {
+    /// <summary>
+    /// ConfigManager handles reading in values in the config file and stores them for access throughout the program
+    /// </summary>
     static class ConfigManager
     {
         private const string LogSource = "ConfigManager";
