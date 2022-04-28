@@ -1,6 +1,6 @@
 {
 	"hlfOptions": {
-		"IsTraceEnabled": true,
+		"IsTraceEnabled": false,
 		"ScryfallPath": "D:\\Personal Files\\Docs\\Magic\\HalfMagic\\VS App\\default-cards-20220424210639.json",
 		"ProximityDirectory": "D:\\Personal Files\\Docs\\Magic\\HalfMagic\\VS App\\Proximity",
 		"ArtFileExtension": ".jpg",
@@ -8,37 +8,7 @@
 		"DeleteBadFaces": false,
 		"IllegalSetCodes": [ "htr", "cmb" ],
 		"UseCardSubset": false,
-		"CardSubset": [
-			"Alive // Well",
-			"Fae of Wishes // Granted",
-			"Find // Finality",
-			"Hide // Seek",
-			"Road // Ruin",
-
-			"Night // Day",
-			"Fast // Furious",
-			"Animating Faerie // Bring to Life",
-			"Ardenvale Tactician // Dizzying Swoop",
-			"Beanstalk Giant // Fertile Footsteps",
-
-			"Bonecrusher Giant // Stomp",
-			"Brazen Borrower // Petty Theft",
-			"Curious Pair // Treats to Share",
-			"Embereth Shieldbreaker // Battle Display",
-			"Faerie Guidemother // Gift of the Fae",
-
-			"Flaxen Intruder // Welcome Home",
-			"Foulmire Knight // Profane Insight",
-			"Garenbrig Carver // Shield's Might",
-			"Giant Killer // Chop Down",
-			"Hypnotic Sprite // Mesmeric Glare",
-
-			"Lonesome Unicorn // Rider in Need",
-			"Lovestruck Beast // Heart's Desire",
-			"Merchant of the Vale // Haggle",
-			"Onward // Victory",
-			"Illusion // Reality"
-		],
+		"CardSubset": [ "Fae of Wishes // Granted" ],
 		"ManualArtistOverrides": [
 			{
 				"card": "Animating Faerie // Bring to Life",
