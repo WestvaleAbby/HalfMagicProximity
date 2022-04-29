@@ -9,7 +9,7 @@
     public class CardData
     {
         private const string LogSource = "Card";
-        private string namedLogSource => $"{LogSource}: {Name}";
+        private string namedLogSource => $"{LogSource}: {DisplayName}";
 
         public string Name { get; private set; }
         public string DisplayName { get; private set; }
@@ -26,39 +26,38 @@
         public bool NeedsColorOverride => Color != OtherFace.Color;
         public bool NeedsArtOverride => Face == CardFace.Back || Layout == CardLayout.Split;
         public bool NeedsArtistOverride => Artist != OtherFace.Artist || manualArtist;
-        public bool NeedsWatermarkOverride => !string.IsNullOrEmpty(Watermark);
+        public bool NeedsWatermarkOverride => !string.IsNullOrEmpty(Watermark) || !string.IsNullOrEmpty(OtherFace.Watermark);
 
         public CardData(string name, string manaCost, string art, string artist, CardFace face, CardLayout layout, string watermark)
         {
-            if (string.IsNullOrEmpty(name)) 
+            if (string.IsNullOrEmpty(name))
                 Logger.Warn(LogSource, "Card object created with no name!");
             Name = name;
 
-            if (string.IsNullOrEmpty(manaCost)) 
+            Face = face;
+            if (Face == CardFace.Front)
+                DisplayName = Name.Split(" // ").First().Trim();
+            else
+                DisplayName = Name.Split(" // ").Last().Trim();
+
+            if (string.IsNullOrEmpty(manaCost))
                 Logger.Warn(namedLogSource, "Card object created with no manaCost!");
             GetColorData(manaCost);
 
-            if (string.IsNullOrEmpty(art)) 
+            if (string.IsNullOrEmpty(art))
                 Logger.Warn(namedLogSource, "Card object created with no art file name!");
             ArtFileName = art;
 
-            if (string.IsNullOrEmpty(artist)) 
+            if (string.IsNullOrEmpty(artist))
                 Logger.Warn(namedLogSource, "Card object created with no artist name!");
             Artist = artist;
 
-            if (layout == CardLayout.None) 
+            if (layout == CardLayout.None)
                 Logger.Warn(namedLogSource, "Card object created with no layout!");
             Layout = layout;
 
-            Face = face;
-
             // Don't need to check if watermark is empty, empty indicates no watermark
             Watermark = watermark;
-
-            if (Face == CardFace.Front)
-                DisplayName = Name.Split(" // ").First().Trim();
-            else 
-                DisplayName = Name.Split(" // ").Last().Trim();
         }
 
         /// <summary>
@@ -90,23 +89,33 @@
             switch (color)
             {
                 case "UG":
-                    Logger.Trace(namedLogSource, $"Correcting color of '{DisplayName}' from UG to GU.");
+                    Logger.Trace(namedLogSource, $"Correcting color from UG to GU.");
                     return "GU";
                 case "WG":
-                    Logger.Trace(namedLogSource, $"Correcting color of '{DisplayName}' from WG to GW.");
+                    Logger.Trace(namedLogSource, $"Correcting color from WG to GW.");
                     return "GW";
                 case "WR":
-                    Logger.Trace(namedLogSource, $"Correcting color of '{DisplayName}' from WR to RW.");
+                    Logger.Trace(namedLogSource, $"Correcting color from WR to RW.");
                     return "RW";
-                default: 
+                default:
                     return color;
             }
         }
+
         public void CorrectArtist(string newArtist)
         {
-            Logger.Trace(LogSource + $": {Name}", $"Manually correcting artist of '{DisplayName}' from '{Artist}' to '{newArtist}'.");
+            Logger.Trace(namedLogSource, $"Manually correcting artist from '{Artist}' to '{newArtist}'.");
             manualArtist = true;
             Artist = newArtist;
+        }
+
+        public void CorrectWatermark()
+        {
+            if (string.IsNullOrEmpty(Watermark) && !string.IsNullOrEmpty(OtherFace.Watermark))
+            {
+                Logger.Trace(namedLogSource, $"Manually correcting missing watermark to match {OtherFace.DisplayName}'s {OtherFace.Watermark} watermark.");
+                Watermark = OtherFace.Watermark;
+            }
         }
 
         public bool ValidateCard()
@@ -119,29 +128,29 @@
 
             if (NeedsColorOverride && Color.Length != ColorCount)
             {
-                Logger.Warn(namedLogSource, $"Colors and color count for {Name} are mismatched: {Color}, {ColorCount}");
+                Logger.Warn(namedLogSource, $"Colors and color count are mismatched: {Color}, {ColorCount}.");
                 return false;
             }
 
             if (NeedsWatermarkOverride && string.IsNullOrEmpty(Watermark))
             {
-                Logger.Warn(namedLogSource, $"Watermark is missing from {Watermark}");
+                Logger.Warn(namedLogSource, $"Watermark is missing.");
                 return false;
             }
 
             if (NeedsArtistOverride && string.IsNullOrEmpty(Artist))
             {
-                Logger.Warn(namedLogSource, $"Artist is missing from {Watermark}");
+                Logger.Warn(namedLogSource, $"Artist is missing.");
                 return false;
             }
 
             if (NeedsArtOverride && string.IsNullOrEmpty(ArtFileName))
             {
-                Logger.Warn(namedLogSource, $"Art file is missing from {ArtFileName}");
+                Logger.Warn(namedLogSource, $"Art file is missing.");
                 return false;
             }
 
-            Logger.Trace(namedLogSource, $"{Name} validated succesfully. No issues detected.");
+            Logger.Trace(namedLogSource, $"{DisplayName} validated succesfully. No issues detected.");
 
             return true;
         }

@@ -125,15 +125,14 @@ namespace HalfMagicProximity
                 if (manualArtistOverride != null && face == manualArtistOverride.CardFace)
                     cardFaces[i].CorrectArtist(manualArtistOverride.Artist);
 
-                if (cardFaces[i].NeedsWatermarkOverride)
-                    Logger.Trace(LogSource, $"'{cardFaces[i].Name}' needs a watermark override for {cardFaces[i].Watermark}.");
-
                 Cards.Add(cardFaces[i]);
 
                 Logger.Debug(LogSource, $"{cardFaces[i].DisplayName} is legal.");
                 Logger.Trace(LogSource, $" - {cardFaces[i].Name} ({cardFaces[i].Layout} {cardFaces[i].Face})");
                 Logger.Trace(LogSource, $" - {cardFaces[i].Color} ({cardFaces[i].ColorCount} colors)");
-                Logger.Trace(LogSource, $" - Artist: {cardFaces[i].Artist} | Art: '{cardFaces[i].ArtFileName}'");
+                Logger.Trace(LogSource, $" - Artist: {cardFaces[i].Artist} | Art: {cardFaces[i].ArtFileName}");
+                if (!string.IsNullOrEmpty(cardFaces[i].Watermark))
+                    Logger.Trace(LogSource, $" - Watermark: {cardFaces[i].Watermark}");
             }
 
             cardFaces[0].OtherFace = cardFaces[1];
@@ -151,6 +150,17 @@ namespace HalfMagicProximity
                     Logger.Trace(LogSource, $"'{cardFaces[0].Name}' needs an artist override since it was manually corrected.");
                 else
                     Logger.Trace(LogSource, $"'{cardFaces[0].Name}' needs an artist override: Front is '{cardFaces[0].Artist}', Back is '{cardFaces[1].Artist}'.");
+            }
+
+            // Some cards (some back gold faces of hybrid split cards) don't properly have their watermark in the JSON
+            if (cardFaces[0].NeedsWatermarkOverride || cardFaces[1].NeedsWatermarkOverride)
+            {
+                if (string.IsNullOrEmpty(cardFaces[0].Watermark))
+                    cardFaces[0].CorrectWatermark();
+                if (string.IsNullOrEmpty(cardFaces[1].Watermark))
+                    cardFaces[1].CorrectWatermark();
+
+                Logger.Trace(LogSource, $"'{cardFaces[0].Name}' needs a watermark override: Front is '{cardFaces[0].Watermark}'. Back is '{cardFaces[1].Watermark}'.");
             }
         }
 

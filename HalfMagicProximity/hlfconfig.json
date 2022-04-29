@@ -1,8 +1,8 @@
 {
 	"hlfOptions": {
-		"IsTraceEnabled": true,
-		"ScryfallPath": "D:\\Personal Files\\Docs\\Magic\\HalfMagic\\VS App\\default-cards-20220424210639.json",
-		"ProximityDirectory": "D:\\Personal Files\\Docs\\Magic\\HalfMagic\\VS App\\Proximity",
+		"IsTraceEnabled": false,
+		"ScryfallPath": "",
+		"ProximityDirectory": "",
 		"ArtFileExtension": ".jpg",
 		"ProxyRarityOverride": "uncommon",
 		"DeleteBadFaces": true,
