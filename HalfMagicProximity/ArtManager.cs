@@ -24,7 +24,13 @@ namespace HalfMagicProximity
             if (Directory.Exists(executingDirectory))
             {
                 // Handle preparation of output directory
-                string outputDirectory = PrepOutputDirectory(executingDirectory);
+                string outputDirectory = Path.Combine(executingDirectory, "Proxies");
+                if (!Directory.Exists(outputDirectory))
+                {
+                    Directory.CreateDirectory(outputDirectory);
+
+                    Logger.Trace(LogSource, $"Created output directory: {outputDirectory}");
+                }
 
                 // Get all raw proxy images
                 IEnumerable<string> frontImages = Directory.EnumerateFiles(Path.Combine(executingDirectory, "images", "fronts"));
@@ -58,7 +64,6 @@ namespace HalfMagicProximity
                         cardName = cardName.Replace(".png", "").Trim();
 
                         string number = splitFileName.First().Replace("a", "").Replace("b", "").Trim();
-
                         int numberInt = 0;
                         int.TryParse(number, out numberInt);
 
@@ -101,7 +106,7 @@ namespace HalfMagicProximity
                             }
                             else
                             {
-                                Logger.Warn(LogSource, $"Unable to find a rendered proxy for {cardName}.");
+                                Logger.Warn(LogSource, $"Unable to find card data for '{fileName}'.");
                             }
 
                             processedCount++;
@@ -128,37 +133,13 @@ namespace HalfMagicProximity
                     }
                 }
                 if (failedProxies > 0)
-                    Logger.Error(LogSource, $"{failedProxies} cards did not have successful proxies generated. Consider specifying them in the config file and running again!");
+                {
+                    Logger.Error(LogSource, $"{failedProxies} cards did not have successful proxies generated!");
+                    Logger.Debug(LogSource, $"Consider specifying failed cards in the config file and running again.");
+                }
 
                 Logger.Info(LogSource, $"{goodProxyCount} completed renders are available in '{outputDirectory}'!");
             }
-        }
-
-        /// <summary>
-        /// Creates the output directory if it doesn't exist, and empties it if it does
-        /// </summary>
-        /// <param name="executingDirectory">Executing directory in which to put the output directory by default</param>
-        /// <returns>Full path to the output directory</returns>
-        private string PrepOutputDirectory(string executingDirectory)
-        {
-            string outputDirectory = Path.Combine(executingDirectory, "Proxies");
-            if (!Directory.Exists(outputDirectory))
-            {
-                Directory.CreateDirectory(outputDirectory);
-
-                Logger.Trace(LogSource, $"Created output directory: {outputDirectory}");
-            }
-            else
-            {
-                Logger.Trace(LogSource, $"Deleting old proxies in {outputDirectory}");
-                foreach (string oldFile in Directory.GetFiles(outputDirectory))
-                {
-                    File.Delete(oldFile);
-                    Logger.Trace(LogSource, $"Deleted '{oldFile}'.");
-                }
-            }
-
-            return outputDirectory;
         }
 
         private string GetFileName(string fullPath)
