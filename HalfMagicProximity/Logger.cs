@@ -10,6 +10,9 @@
         Prox,
     };
 
+    /// <summary>
+    /// Logger takes all output from this program and formats it nicely and outputs it to console
+    /// </summary>
     static class Logger
     {
         private const ConsoleColor InfoColor = ConsoleColor.DarkGreen;

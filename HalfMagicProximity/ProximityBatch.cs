@@ -3,6 +3,10 @@ using System.Text;
 
 namespace HalfMagicProximity
 {
+    /// <summary>
+    /// A batch of cards to be run through Proximity
+    /// Cards are split into batches to ensure smooth rendering
+    /// </summary>
     public class ProximityBatch
     {
         private const string LogSource = "Batch";

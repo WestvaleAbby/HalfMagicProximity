@@ -2,6 +2,9 @@
 
 namespace HalfMagicProximity
 {
+    /// <summary>
+    /// CardManager handles parsing of the Scryfall JSON and creates the list of cards to render
+    /// </summary>
     public class CardManager
     {
         private const string LogSource = "CardManager";
@@ -128,7 +131,9 @@ namespace HalfMagicProximity
                 Cards.Add(cardFaces[i]);
 
                 Logger.Debug(LogSource, $"{cardFaces[i].DisplayName} is legal.");
-                Logger.Trace(LogSource, $" - {cardFaces[i].Color} ({cardFaces[i].ColorCount} colors) | Artist: {cardFaces[i].Artist} | Art: '{cardFaces[i].ArtFileName}'");
+                Logger.Trace(LogSource, $" - {cardFaces[i].Name} ({cardFaces[i].Layout} {cardFaces[i].Face})");
+                Logger.Trace(LogSource, $" - {cardFaces[i].Color} ({cardFaces[i].ColorCount} colors)");
+                Logger.Trace(LogSource, $" - Artist: {cardFaces[i].Artist} | Art: '{cardFaces[i].ArtFileName}'");
             }
 
             cardFaces[0].OtherFace = cardFaces[1];

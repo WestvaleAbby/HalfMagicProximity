@@ -1,7 +1,8 @@
-﻿using System.Text;
-
-namespace HalfMagicProximity
+﻿namespace HalfMagicProximity
 {
+    /// <summary>
+    /// ProximityManager handles all functionality related to running the Proximity program
+    /// </summary>
     public class ProximityManager
     {
         private const string LogSource = "ProximityManager";
@@ -80,13 +81,12 @@ namespace HalfMagicProximity
 
             if (rerenderBatches.Count == rerenderAttempts)
                 rerenderBatches.Add(new ProximityBatch(this, RerenderBatchNameBase + rerenderAttempts, ProximityFileName));
-
+            
+            // Retry both front and back to be safe
             CardData[] cardsToRerender = allCards.Where(x => x.Name.ToLower().Contains(failedCard.ToLower())).ToArray();
 
             Logger.Trace(LogSource, $"There are {cardsToRerender.Length} potential cards to rerender for '{failedCard}'.");
 
-            // Since we can't determine if a front or back half failed, we need to add both
-            // ARGTODO: Filter out duplicates? Probably unnecessary in a real world scenario
             foreach (CardData cardData in cardsToRerender)
                 rerenderBatches[rerenderAttempts].AddCard(cardData);
         }
