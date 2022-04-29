@@ -20,12 +20,13 @@ namespace HalfMagicProximity
         public void CleanProxies()
         {
             string executingDirectory = GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-            
+
             if (Directory.Exists(executingDirectory))
             {
-                string outputDirectory = Path.Combine(executingDirectory, "Proxies");
-                if (!Directory.Exists(outputDirectory)) Directory.CreateDirectory(outputDirectory);
+                // Handle preparation of output directory
+                string outputDirectory = PrepOutputDirectory(executingDirectory);
 
+                // Get all raw proxy images
                 IEnumerable<string> frontImages = Directory.EnumerateFiles(Path.Combine(executingDirectory, "images", "fronts"));
                 IEnumerable<string> backImages = Directory.EnumerateFiles(Path.Combine(executingDirectory, "images", "backs"));
 
@@ -34,11 +35,11 @@ namespace HalfMagicProximity
                 int goodProxyCount = 0;
 
                 // Iterate through all of the proxies we've found
-                foreach(string proxyFilePath in frontImages.Concat(backImages))
+                foreach (string proxyFilePath in frontImages.Concat(backImages))
                 {
                     string fileName = GetFileName(proxyFilePath);
                     Logger.Trace(LogSource, $"Found '{fileName}' in {GetDirectoryName(proxyFilePath)}.");
-                    
+
                     if (File.Exists(proxyFilePath))
                     {
                         if (!fileName.EndsWith(ExpectedExtension))
@@ -48,7 +49,7 @@ namespace HalfMagicProximity
                             continue;
                         }
 
-                        // Separeat  the card name and the proxy number from the file name
+                        // Separate  the card name and the proxy number from the file name
                         string[] splitFileName = fileName.Split(" ");
 
                         string cardName = "";
@@ -73,12 +74,8 @@ namespace HalfMagicProximity
                                 bool deleteProxy = (cardData.Face == CardFace.Front && isEven) ||
                                     (cardData.Face == CardFace.Back && !isEven);
 
-                                if (deleteProxy)
-                                {
-                                    Logger.Trace(LogSource, $"Found bad proxy for {cardName}. Deleting '{fileName}'.");
-                                    File.Delete(proxyFilePath);
-                                }
-                                else
+                                // Copy good proxies to the output directory and rename them without the proximity render number in front
+                                if (!deleteProxy)
                                 {
                                     Logger.Debug(LogSource, $"Found good proxy for {cardData.DisplayName}.");
                                     string goodProxyPath = Path.Combine(outputDirectory, cardName + ExpectedExtension);
@@ -94,6 +91,12 @@ namespace HalfMagicProximity
                                     {
                                         Logger.Error(LogSource, $"Unable to collect good proxy for {cardName}!");
                                     }
+
+                                    Logger.Trace(LogSource, $"Raw proxy file no longer needed. Deleting '{fileName}'.");
+                                }
+                                else
+                                {
+                                    Logger.Trace(LogSource, $"Found bad proxy for {cardName}. Deleting '{fileName}'.");
                                 }
                             }
                             else
@@ -104,13 +107,17 @@ namespace HalfMagicProximity
                             processedCount++;
                             Logger.Trace(LogSource, $"Processed {processedCount} of {totalFileCount} potential proxies.");
                         }
+
+                        // Delete file once we're done with it to keep things clean for next run
+                        File.Delete(proxyFilePath);
                     }
                     else
                     {
                         Logger.Warn(LogSource, $"Unable to find file '{proxyFilePath}'.");
-                    }                    
+                    }
                 }
 
+                // Output all failed cards so the user knowns which to retry
                 int failedProxies = 0;
                 foreach (CardData thisCard in cards)
                 {
@@ -125,6 +132,33 @@ namespace HalfMagicProximity
 
                 Logger.Info(LogSource, $"{goodProxyCount} completed renders are available in '{outputDirectory}'!");
             }
+        }
+
+        /// <summary>
+        /// Creates the output directory if it doesn't exist, and empties it if it does
+        /// </summary>
+        /// <param name="executingDirectory">Executing directory in which to put the output directory by default</param>
+        /// <returns>Full path to the output directory</returns>
+        private string PrepOutputDirectory(string executingDirectory)
+        {
+            string outputDirectory = Path.Combine(executingDirectory, "Proxies");
+            if (!Directory.Exists(outputDirectory))
+            {
+                Directory.CreateDirectory(outputDirectory);
+
+                Logger.Trace(LogSource, $"Created output directory: {outputDirectory}");
+            }
+            else
+            {
+                Logger.Trace(LogSource, $"Deleting old proxies in {outputDirectory}");
+                foreach (string oldFile in Directory.GetFiles(outputDirectory))
+                {
+                    File.Delete(oldFile);
+                    Logger.Trace(LogSource, $"Deleted '{oldFile}'.");
+                }
+            }
+
+            return outputDirectory;
         }
 
         private string GetFileName(string fullPath)
