@@ -1,6 +1,6 @@
 {
 	"hlfOptions": {
-		"IsTraceEnabled": false,
+		"IsTraceEnabled": true,
 		"ScryfallPath": "",
 		"ProximityDirectory": "",
 		"ArtFileExtension": ".jpg",

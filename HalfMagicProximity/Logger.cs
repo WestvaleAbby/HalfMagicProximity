@@ -51,16 +51,15 @@
 
             EnableSeverityColors(severity);
 
+            string content = $"{dateTimeStamp} {severity,-5} [{source}] {message}";
+
+            // Proximity logs will already have the severity and source included, so we don't need to output it again
+            if (severity == Severity.Prox)
+                content = $"{dateTimeStamp} {message}";
+
+            Console.WriteLine(content);
+
             // ARGTODO: Output logging message to a log file
-            // Most Proximity logs will already have the severity and source included, so we don't need to output it again
-            if (severity == Severity.Prox && message.Contains("[Proximity]"))
-            {
-                Console.WriteLine($"{dateTimeStamp} {message}");
-            }
-            else
-            {
-                Console.WriteLine($"{dateTimeStamp} {severity,-5} [{source}] {message}");
-            }
 
             RestoreDefaultColors();
         }
