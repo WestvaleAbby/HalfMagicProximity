@@ -1,13 +1,13 @@
 {
 	"hlfOptions": {
-		"IsTraceEnabled": false,
+		"IsTraceEnabled": true,
 		"ScryfallPath": "",
 		"ProximityDirectory": "",
 		"ArtFileExtension": ".jpg",
 		"ProxyRarityOverride": "uncommon",
 		"DeleteBadFaces": true,
 		"IllegalSetCodes": [ "htr", "cmb" ],
-		"UseCardSubset": false,
+		"UseCardSubset": true,
 		"CardSubset": [ "Fae of Wishes // Granted" ],
 		"ManualArtistOverrides": [
 			{

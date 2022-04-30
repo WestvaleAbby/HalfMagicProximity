@@ -25,7 +25,9 @@ namespace HalfMagicProximity
                     artManager.CleanProxies();
 
                 TimeSpan elapsed = timer.Elapsed;
-                string elapsedString = string.Format("{0:00}:{1:00}:{2:00}.{3:00}", elapsed.Hours, elapsed.Minutes, elapsed.Seconds, elapsed.Milliseconds / 10);
+                string elapsedString = string.Format("{0:00}:{1:00}.{2:00}", elapsed.Minutes, elapsed.Seconds, elapsed.Milliseconds / 10);
+                if (elapsed.Hours > 0)
+                    elapsedString = string.Format("{0:00}", elapsed.Hours) + elapsedString;
 
                 Logger.Debug("App", $"Completed in {elapsedString}.");
             }

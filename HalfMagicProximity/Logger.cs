@@ -49,6 +49,8 @@ namespace HalfMagicProximity
             logFilePath = Path.Combine(logDirectory, logFileName);
 
             File.Create(logFileName).Close();
+
+            Debug("Logger", $"Logs are being output to '{logFileName}'.");
         }
 
         /// <summary>
