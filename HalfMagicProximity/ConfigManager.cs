@@ -443,14 +443,10 @@ namespace HalfMagicProximity
 
             Logger.Debug(LogSource, $"Loaded {ManualArtistOverrides.Count} manual artist overrides.");
         }
-        private static string GetFileName(string fullPath)
-        {
-            return fullPath.Split(Path.DirectorySeparatorChar).Last();
-        }
 
         private static string GetDirectoryName(string fullPath)
         {
-            return fullPath.Replace(GetFileName(fullPath), "");
+            return fullPath.Replace(fullPath.Split(Path.DirectorySeparatorChar).Last(), "");
         }
     }
 

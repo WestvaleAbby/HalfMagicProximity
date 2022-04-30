@@ -7,7 +7,7 @@
 		"ProxyRarityOverride": "uncommon",
 		"DeleteBadFaces": true,
 		"IllegalSetCodes": [ "htr", "cmb" ],
-		"UseCardSubset": true,
+		"UseCardSubset": false,
 		"CardSubset": [ "Fae of Wishes // Granted" ],
 		"ManualArtistOverrides": [
 			{

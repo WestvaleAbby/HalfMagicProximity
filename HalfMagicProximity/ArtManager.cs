@@ -24,7 +24,7 @@ namespace HalfMagicProximity
             if (Directory.Exists(executingDirectory))
             {
                 // Handle preparation of output directory
-                string outputDirectory = Path.Combine(executingDirectory, "Proxies");
+                string outputDirectory = Path.Combine(executingDirectory, "proxies");
                 if (!Directory.Exists(outputDirectory))
                 {
                     Directory.CreateDirectory(outputDirectory);
@@ -103,7 +103,7 @@ namespace HalfMagicProximity
                                     }
                                     else
                                     {
-                                        Logger.Debug(LogSource, $"Found a duplicate good proxy. Deleting.");
+                                        Logger.Trace(LogSource, $"Found a duplicate good proxy. Deleting.");
                                     }
                                 }
                                 else
