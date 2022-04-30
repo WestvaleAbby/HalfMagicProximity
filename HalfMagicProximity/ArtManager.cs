@@ -82,22 +82,29 @@ namespace HalfMagicProximity
                                 // Copy good proxies to the output directory and rename them without the proximity render number in front
                                 if (!deleteProxy)
                                 {
-                                    Logger.Debug(LogSource, $"Found good proxy for {cardData.DisplayName}.");
+                                    Logger.Trace(LogSource, $"Found good proxy for {cardData.DisplayName}.");
                                     string goodProxyPath = Path.Combine(outputDirectory, cardName + ExpectedExtension);
 
-                                    File.Copy(proxyFilePath, goodProxyPath, true);
-
-                                    if (File.Exists(goodProxyPath))
+                                    // If we haven't made a proxy of this card yet then make one, otherwise ignore it
+                                    if (!File.Exists(goodProxyPath))
                                     {
-                                        Logger.Debug(LogSource, $"Good proxy for {cardName} copied to '{goodProxyPath}'.");
-                                        goodProxyCount++;
+                                        File.Copy(proxyFilePath, goodProxyPath, true);
+
+                                        if (File.Exists(goodProxyPath))
+                                        {
+                                            Logger.Debug(LogSource, $"Good proxy for {cardName} copied to '{goodProxyPath}'.");
+                                            goodProxyCount++;
+                                        }
+                                        else
+                                        {
+                                            Logger.Error(LogSource, $"Unable to collect good proxy for {cardName}!");
+                                        }
+                                        Logger.Trace(LogSource, $"Raw proxy file no longer needed. Deleting '{fileName}'.");
                                     }
                                     else
                                     {
-                                        Logger.Error(LogSource, $"Unable to collect good proxy for {cardName}!");
+                                        Logger.Debug(LogSource, $"Found a duplicate good proxy. Deleting.");
                                     }
-
-                                    Logger.Trace(LogSource, $"Raw proxy file no longer needed. Deleting '{fileName}'.");
                                 }
                                 else
                                 {

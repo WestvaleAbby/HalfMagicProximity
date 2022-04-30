@@ -11,7 +11,7 @@ namespace HalfMagicProximity
     {
         private const string LogSource = "Batch";
         private string namedLogSource => $"{LogSource}: {name}";
-        public const int MaxCardCount = 20; // Should be even so both halves of a card end up in the same batch
+        public const int MaxCardCount = 40; // Should be even so both halves of a card end up in the same batch
 
         private ProximityManager manager;
 
@@ -25,6 +25,8 @@ namespace HalfMagicProximity
 
         private string proximityFile;
         private string proximityPath => Path.Combine(ConfigManager.ProximityDirectory, proximityFile);
+        private string templateFile => "hlf.zip";
+        private string templatePath => Path.Combine(ConfigManager.ProximityDirectory, "templates", templateFile);
 
         public int CardCount { get; private set; }
         public bool IsFull => CardCount >= MaxCardCount;
@@ -148,6 +150,18 @@ namespace HalfMagicProximity
                 return false;
             }
 
+            // Check for the proximity template file
+            if (File.Exists(templatePath))
+            {
+                Logger.Trace(namedLogSource, $"Batch file '{templateFile}' is present.");
+            }
+            else
+            {
+                Logger.Error(namedLogSource, $"Batch file not found: {templatePath}");
+
+                return false;
+            }
+
             // Check for the batch file to run
             if (File.Exists(commandPath))
             {
@@ -175,8 +189,7 @@ namespace HalfMagicProximity
                 using (FileStream commandStream = File.Create(commandPath))
                 {
                     // ARGTODO: Include RAM allocation override (-Xmx8g) after 'java'?
-                    string templatePath = Path.Combine(ConfigManager.ProximityDirectory, "templates", "hlf.zip").Replace("\\", "\\\\");
-                    string commandString = $"java -jar \"{proximityPath}\" --template=\"{templatePath}\" --cards=\"{deckPath.Replace("\\", "\\\\")}\" --art_source=BEST --set_symbol=jmp --use_card_back=true";
+                    string commandString = $"java -jar \"{proximityPath}\" --template=\"{templatePath.Replace("\\", "\\\\")}\" --cards=\"{deckPath.Replace("\\", "\\\\")}\" --art_source=BEST --set_symbol=jmp --use_card_back=true";
                     byte[] commandBytes = new UTF8Encoding(true).GetBytes(commandString);
 
                     commandStream.Write(commandBytes, 0, commandBytes.Length);

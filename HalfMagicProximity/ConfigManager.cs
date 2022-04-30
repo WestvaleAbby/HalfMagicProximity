@@ -49,7 +49,8 @@ namespace HalfMagicProximity
                     JsonElement configOptions = configDoc.RootElement.GetProperty("hlfOptions");
 
                     ParseIsTraceEnabled(configOptions);
-                    if (!ParsePaths(configOptions)) return;
+                    if (!ParseScryfallPath(configOptions)) return;
+                    if (!ParseProximityPath(configOptions)) return;
                     ParseArtExtension(configOptions);
                     ParseRarityOverride(configOptions);
                     ParseProxyCleanup(configOptions);
@@ -85,44 +86,210 @@ namespace HalfMagicProximity
         }
 
         /// <summary>
-        /// Try to find paths for scryfall JSON and proximity directory
+        /// Try to find path for Scryfall JSON
         /// </summary>
-        private static bool ParsePaths(JsonElement configOptions)
+        private static bool ParseScryfallPath(JsonElement configOptions)
         {
             // Find path to scryfall json
             string scryfallString = configOptions.GetProperty("ScryfallPath").GetString();
+            bool validScryfallJson = true;
+
+            //Check whether the specified scryfall json works
             if (string.IsNullOrEmpty(scryfallString))
             {
-                Logger.Error(LogSource, $"Path to Scryfall JSON not supplied!");
-                return false;
+                Logger.Debug(LogSource, $"Path to Scryfall JSON not supplied.");
+                validScryfallJson = false;
             }
             else if (!File.Exists(scryfallString))
             {
-                Logger.Error(LogSource, $"Scryfall JSON not found at '{scryfallString}'!");
-                return false;
+                Logger.Warn(LogSource, $"Scryfall JSON not found at '{scryfallString}'.");
+                validScryfallJson = false;
+            }
+            else if (File.Exists(scryfallString) && !IsScryfallJSON(scryfallString))
+            {
+                Logger.Warn(LogSource, $"Provided JSON is not a valid Scryfall JSON file.");
+                validScryfallJson = false;
+            }
+
+            // If the provided JSON is not found or not set, look in the executing directory for one to use
+            if (!validScryfallJson)
+            {
+                Logger.Trace(LogSource, $"Attempting to pull Scryfall file from executing directory.");
+
+                string scryfallDirectory = Path.Combine(GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "scryfall");
+
+                if (Directory.Exists(scryfallDirectory))
+                {
+                    string[] scryfallFiles = Directory.GetFiles(scryfallDirectory, "*.json");
+
+                    if (scryfallFiles.Length <= 0)
+                    {
+                        Logger.Error(LogSource, $"No JSON files found in Scryfall directory '{scryfallDirectory}'!");
+                        return false;
+                    }
+
+                    // Check each file in the directory for validity
+                    foreach (string file in scryfallFiles)
+                    {
+                        if (IsScryfallJSON(file))
+                        {
+                            ScryfallPath = file;
+                            Logger.Debug(LogSource, $"Scryfall JSON found in executing directory.");
+                        }
+                    }
+
+                    if (string.IsNullOrEmpty(ScryfallPath))
+                    {
+                        Logger.Error(LogSource, $"Unable to find Scryfall JSON in executing directory!");
+                    }
+                }
+                else
+                {
+                    Logger.Error(LogSource, $"Unable to find Scryfall directory '{scryfallDirectory}'!");
+                    return false;
+                }
             }
             else
             {
                 ScryfallPath = scryfallString;
-                Logger.Debug(LogSource, $"Scryfall path pulled from config: '{ScryfallPath}'.");
+                Logger.Debug(LogSource, $"Scryfall JSON pulled from config: '{ScryfallPath}'.");
             }
 
+            return true;
+        }
+
+        /// <summary>
+        /// Try to find paths proximity directory
+        /// </summary>
+        private static bool ParseProximityPath(JsonElement configOptions)
+        {
             // Find path to proximity files
             string proximityString = configOptions.GetProperty("ProximityDirectory").GetString();
+            bool validProximityString = true;
+
             if (string.IsNullOrEmpty(proximityString))
             {
-                Logger.Error(LogSource, $"Path to Proximity directory not found!");
-                return false;
+                Logger.Debug(LogSource, $"Path to Proximity directory not supplied.");
+                validProximityString = false;
             }
             else if (!Directory.Exists(proximityString))
             {
-                Logger.Error(LogSource, $"Proximity directory not found at '{ProximityDirectory}'!");
-                return false;
+                Logger.Warn(LogSource, $"Proximity directory not found at '{ProximityDirectory}'.");
+                validProximityString = false;
+            }
+            else if (Directory.Exists(proximityString) && !IsProximityDirectory(proximityString))
+            {
+                Logger.Warn(LogSource, $"Provided directory is not a valid Proximity directory.");
+                validProximityString = false;
+            }
+            
+            // If the provided proximity directory doesn't work or is not supplied, check the executing directory
+            if (!validProximityString)
+            {
+                Logger.Trace(LogSource, $"Attempting to find Proximity files in executing directory.");
+
+                string executingDirectory = GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+
+                if (!IsProximityDirectory(executingDirectory))
+                {
+                    Logger.Error(LogSource, $"Unable to find Proximity files in executing directory!");
+                    return false;
+                }
+                else
+                {
+                    ProximityDirectory = executingDirectory;
+                    Logger.Debug(LogSource, $"Proximity files found in executing directory.");
+                }
             }
             else
             {
                 ProximityDirectory = proximityString;
-                Logger.Debug(LogSource, $"Proximity directory pulled from config: '{ProximityDirectory}'.");
+                Logger.Debug(LogSource, $"Proximity files found from config: '{ProximityDirectory}'.");
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// Determine whether a given file is a potentially valid scryfall json file
+        /// </summary>
+        private static bool IsScryfallJSON(string filePath)
+        {
+            if (!File.Exists(filePath))
+            {
+                Logger.Trace(LogSource, $"'{filePath} does not exist.");
+                return false;
+            }
+
+            if (!filePath.EndsWith(".json"))
+            {
+                Logger.Trace(LogSource, $"'{filePath} is not a JSON file.");
+                return false;
+            }
+
+            try
+            {
+                using (FileStream fs = File.OpenRead(filePath))
+                using (JsonDocument document = JsonDocument.Parse(fs))
+                {
+                    JsonElement root = document.RootElement;
+
+                    if (root.GetArrayLength() <= 0)
+                    {
+                        Logger.Trace(LogSource, $"'{filePath}' is empty.");
+                        return false;
+                    }
+
+                    if (root[0].GetProperty("object").GetString() != "card")
+                    {
+                        Logger.Trace(LogSource, $"'{filePath}' does not contain any card objects.");
+                        return false;
+                    }
+                }
+            }
+            catch (FileNotFoundException e)
+            {
+                Logger.Trace(LogSource, $"JSON file '{filePath}' not found: {e.Message}");
+
+                return false;
+            }
+            catch (JsonException e)
+            {
+                Logger.Trace(LogSource, $"JSON error reading '{filePath}': {e.Message}");
+
+                return false;
+            }
+            catch (Exception e)
+            {
+                Logger.Trace(LogSource, $"{e.Message}");
+
+                return false;
+            }
+
+            Logger.Trace(LogSource, $"'{filePath}' is a valid Scryfall JSON file.");
+            return true;
+        }
+
+        private static bool IsProximityDirectory(string directory)
+        {
+            if (!Directory.Exists(directory))
+            {
+                Logger.Trace(LogSource, $"Proximity directory '{directory}' does not exist.");
+                return false;
+            }
+
+            string proximityFile = Path.Combine(directory, "proximity-0.6.2.jar");
+            if (!File.Exists(proximityFile))
+            {
+                Logger.Trace(LogSource, $"Proximity directory '{directory}' does not contain a Proximity file.");
+                return false;
+            }
+
+            string templateFile = Path.Combine(directory, "templates", "hlf.zip");
+            if (!File.Exists(templateFile))
+            {
+                Logger.Trace(LogSource, $"Proximity directory '{directory}' does not contain a Proximity template file.");
+                return false;
             }
 
             return true;
@@ -275,6 +442,15 @@ namespace HalfMagicProximity
             }
 
             Logger.Debug(LogSource, $"Loaded {ManualArtistOverrides.Count} manual artist overrides.");
+        }
+        private static string GetFileName(string fullPath)
+        {
+            return fullPath.Split(Path.DirectorySeparatorChar).Last();
+        }
+
+        private static string GetDirectoryName(string fullPath)
+        {
+            return fullPath.Replace(GetFileName(fullPath), "");
         }
     }
 
