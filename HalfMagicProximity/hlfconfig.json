@@ -1,14 +1,52 @@
 {
 	"hlfOptions": {
-		"IsTraceEnabled": true,
+		"hlfOptions_Instructions": "Use this config file to adjust the functionality of this app. Each option has individual instructions with it.",
+
+		"ProxyOutputDirectory_Instructions": "This is the directory that final proxies will end up in. Defaults to 'proxies' in the same folder as the exe if invalid or left blank.",
+		"ProxyOutputDirectory": "",
+
+		"ScryfallPath_Instructions": "This is the path to a Scryfall JSON file. Defaults to 'scryfall' in the same folder as the exe if invalid or left blank.",
 		"ScryfallPath": "",
+
+		"ProximityDirectory_Instructions": "This is the directory containing the files Proximity needs to run. Defaults to the same folder as the exe if invalid or left blank.",
 		"ProximityDirectory": "",
-		"ArtFileExtension": ".jpg",
-		"ProxyRarityOverride": "uncommon",
+
+		"IsTraceEnabled_Instructions": "Enables more detailed trace logs. Not needed for most users.",
+		"IsTraceEnabled": true,
+
+		"DeleteBadFaces_Instructions": "Goes through the proxies created by Proximity and deletes the half that are unusable, then collects the new ones in the output directory.",
 		"DeleteBadFaces": true,
-		"IllegalSetCodes": [ "htr", "cmb" ],
+
+		"UpdatesOnly_Instructions": "Checks for existing proxies in the output directory, and only processes new cards.",
+		"UpdatesOnly": true,
+
+		"RetryCount_Instructions": "How many retries the program will do for cards that fail to render properly in Proximity.",
+		"RetryCount_Instructions_2": "Defaults to 3, which should be more than enough for small batch sizes.",
+		"RetryCount": 3,
+
+		"BatchSize_Instructions": "How many cards to put in one batch. Smaller batch sizes will work better for slower computers. Defaults to 40.",
+		"BatchSize_Instructions_2": "This value must stay even in order for proxies to be deleted and renamed properly. It will be corrected to even if it's not already. ",
+		"BatchSize": 40,
+
+		"ArtFileExtension_Instructions": "The extension for the art crop files supplied to Proximity. NOT the extension for generated proxies, those will be '.png' files.",
+		"ArtFileExtension_Instructions_2": "Defaults to '.jpg' if invalid or left blank.",
+		"ArtFileExtension": ".jpg",
+
+		"ProxyRarityOverride_Instructions": "If you want all of the proxies to share a rarity, assign that here. Defaults to using Scryfall data if invalid or left blank.",
+		"ProxyRarityOverride_Instructions_2": "Valid options are 'common', 'uncommon', 'rare' and 'mythic'.",
+		"ProxyRarityOverride": "uncommon",
+
+		"UseCardSubset_Instructions": "Only generate cards listed in 'CardSubset' option.",
 		"UseCardSubset": true,
+
+		"CardSubset_Instructions": "Add cards to this list and enable 'UseCardSubset' if you only want to generate a specific set of cards rather than the whole format.",
 		"CardSubset": [ "Fae of Wishes // Granted" ],
+
+		"IllegalSetCodes_Instructions": "Sets to filter out from the legal cards. Useful for Un cards and certain promos. Don't change unless you know what you're doing.'",
+		"IllegalSetCodes": [ "htr", "cmb" ],
+
+		"ManualArtistOverrides_Instructions": "List cards here that need artists manually assigned.",
+		"ManualArtistOverrides_Instructions_2": "This will mostly be the back side of adventure cards, as well as any card with two arists credited for the same piece.",
 		"ManualArtistOverrides": [
 			{
 				"card": "Animating Faerie // Bring to Life",
