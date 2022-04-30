@@ -99,7 +99,8 @@ namespace HalfMagicProximity
         {
             if (!string.IsNullOrEmpty(args.Data))
             {
-                Logger.Proximity("Proximity", args.Data.Replace(Environment.NewLine, ""));
+                if (args.Data.Contains("[Proximity]"))
+                    Logger.Proximity("Proximity", args.Data.Replace(Environment.NewLine, ""));
 
                 if (args.Data.ToLower().Contains("failed"))
                 {

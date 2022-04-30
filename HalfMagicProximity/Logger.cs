@@ -1,4 +1,6 @@
-﻿namespace HalfMagicProximity
+﻿using System.Reflection;
+
+namespace HalfMagicProximity
 {
     public enum Severity
     {
@@ -28,10 +30,27 @@
 
         public static bool IsTraceEnabled { get; set; } = false;
 
-        static Logger ()
+        private static string logFilePath;
+
+        static Logger()
         {
             storedForegroundColor = Console.ForegroundColor;
             storedBackroundColor = Console.BackgroundColor;
+
+            string executingDirectory = Assembly.GetExecutingAssembly().Location;
+            executingDirectory = executingDirectory.Replace(executingDirectory.Split(Path.DirectorySeparatorChar).Last(), "");
+            string logDirectory = Path.Combine(executingDirectory, "logs");
+
+            if (!Directory.Exists(logDirectory))
+                Directory.CreateDirectory(logDirectory);
+
+            // Create the log file to which log messages will be output
+            string logFileName = DateTime.Now.ToString("yyyy MM dd HH mm ss") + " hlflog.log";
+            logFilePath = Path.Combine(logDirectory, logFileName);
+
+            File.Create(logFileName).Close();
+
+            Debug("Logger", $"Logs are being output to '{logFileName}'.");
         }
 
         /// <summary>
@@ -40,29 +59,36 @@
         /// </summary>
         /// <param name="severity">The log severity. Trace logs are only reported if IsTraceEnabled = true</param>
         /// <param name="source">The source of the log message.</param>
-        /// <param name="message">The message to output to the console</param>
-        public static void Log(Severity severity, string source, string message)
+        /// <param name="message">The message to output to the console.</param>
+        /// <param name="writeToFile">Flag to avoid writing to file. Defaults to true.</param>
+        public static void Log(Severity severity, string source, string message, bool writeToFile = true)
         {
             // Filter out trace messages if they're not being logged
             if (severity == Severity.Trace && !IsTraceEnabled) return;
 
             // Get the time stamp of the message and format it properly
-            string dateTimeStamp = String.Format("{0:s}", DateTime.Now).Replace('T', ' ');
+            string dateTimeStamp = string.Format("{0:s}", DateTime.Now).Replace('T', ' ');
 
             EnableSeverityColors(severity);
 
-            // ARGTODO: Output logging message to a log file
-            // Most Proximity logs will already have the severity and source included, so we don't need to output it again
-            if (severity == Severity.Prox && message.Contains("[Proximity]"))
-            {
-                Console.WriteLine($"{dateTimeStamp} {message}");
-            }
-            else
-            {
-                Console.WriteLine($"{dateTimeStamp} {severity,-5} [{source}] {message}");
-            }
+            string log = $"{dateTimeStamp} {severity,-5} [{source}] {message}";
+
+            // Proximity logs will already have the severity and source included, so we don't need to output it again
+            if (severity == Severity.Prox)
+                log = $"{dateTimeStamp} {message}";
+
+            Console.WriteLine(log);
 
             RestoreDefaultColors();
+
+            try
+            {
+                File.AppendAllText(logFilePath, log + Environment.NewLine);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex.ToString());
+            }
         }
 
         /// <summary>
