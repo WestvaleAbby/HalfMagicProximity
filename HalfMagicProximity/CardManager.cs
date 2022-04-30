@@ -75,10 +75,38 @@ namespace HalfMagicProximity
                     }
                 }
 
-                if (Cards.Count == 0)
-                    Logger.Error(LogSource, "No legal cards found!");
-                else
+                if (Cards.Count > 0)
+                {
                     Logger.Debug(LogSource, $"Found {Cards.Count} legal cards.");
+
+                    // Check that all of the cards in the card subset got used
+                    if (ConfigManager.UseCardSubset)
+                    {
+                        foreach(string cardName in ConfigManager.CardSubset)
+                        {
+                            CardData cardObject = Cards.Where(x => x.Name.ToLower() == cardName.ToLower()).FirstOrDefault();
+
+                            if (cardObject == null)
+                                Logger.Warn(LogSource, $"'{cardName}' from the list of subset cards is not used. Please verify that it is entered correctly.");
+                        }
+                    }
+
+                    // Check that all artist overrides were used
+                    if (ConfigManager.ManualArtistOverrides.Count > 0)
+                    {
+                        foreach (ManualArtistOverride artistOverride in ConfigManager.ManualArtistOverrides)
+                        {
+                            CardData cardObject = Cards.FirstOrDefault(x => (x.Name.ToLower() == artistOverride.CardName.ToLower() && x.Face == artistOverride.CardFace));
+
+                            if (cardObject == null)
+                                Logger.Warn(LogSource, $"'{artistOverride.CardName} ({artistOverride.CardFace})' from the list of manual artist overrides is not used. Please verify that it is entered correctly.");
+                        }
+                    }
+                }
+                else
+                {
+                    Logger.Error(LogSource, "No legal cards found!");
+                }
             }
             catch (FileNotFoundException e)
             {
