@@ -21,7 +21,7 @@
 
         public void Run()
         {
-            int batchEstimate = allCards.Count / ProximityBatch.MaxCardCount + 1;
+            int batchEstimate = allCards.Count / ConfigManager.BatchSize + 1;
             Logger.Info(LogSource, $"Splitting {allCards.Count} cards into an estimated {batchEstimate} batches.");
 
             // Sort all cards into batches
@@ -62,8 +62,6 @@
 
         private int failedRenderCount = 0;
         private int rerenderAttempts = 0;
-        // ARGTODO: Make MaxRerenderAttempts a config setting
-        private const int MaxRerenderAttempts = 3;
         public void HandleFailedRender(string failedCard)
         {
             failedRenderCount++;
@@ -71,7 +69,7 @@
             Logger.Trace(LogSource, $"Received '{failedCard}' as a card to rerender.");
 
             // No need to track failed renders if we're out of rerender attempts
-            if (rerenderAttempts >= MaxRerenderAttempts) return;
+            if (rerenderAttempts >= ConfigManager.MaxRetries) return;
 
             if (string.IsNullOrEmpty(failedCard))
             {
@@ -110,7 +108,7 @@
                 {
                     Logger.Warn(LogSource, $"There are still {failedRenderCount} card{(failedRenderCount == 1 ? "" : "s")} that failed to render.");
 
-                    if (rerenderAttempts >= MaxRerenderAttempts)
+                    if (rerenderAttempts >= ConfigManager.MaxRetries)
                     {
                         Logger.Error(LogSource, $"No more retries available. Unable to completely render cards!");
                         Logger.Debug(LogSource, $"If you know which cards failed to render, you can add them to 'CardSubset' in the config file ...");
@@ -119,7 +117,7 @@
                     }
 
                     // Add 1 to account for zero indexing
-                    int remainingTries = MaxRerenderAttempts - (rerenderAttempts + 1);
+                    int remainingTries = ConfigManager.MaxRetries - (rerenderAttempts + 1);
                     if (remainingTries == 0)
                         Logger.Debug(LogSource, $"This is the last rerender attempt.");
                     else if (remainingTries == 1)

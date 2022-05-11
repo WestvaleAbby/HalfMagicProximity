@@ -15,12 +15,12 @@
         public string DisplayName { get; private set; }
         public string Color { get; private set; }
         public int ColorCount { get; private set; }
-        public string ArtFileName { get; private set; }
+        public string ArtSourceFile { get; private set; }
         public string Artist { get; private set; }
         private bool manualArtist = false;
         public CardFace Face { get; private set; }
         public CardLayout Layout { get; private set; }
-        public CardData OtherFace { private get; set; }
+        public CardData OtherFace { get; set; }
         public string Watermark { get; private set; }
 
         public bool NeedsColorOverride => Color != OtherFace.Color;
@@ -45,8 +45,8 @@
             GetColorData(manaCost);
 
             if (string.IsNullOrEmpty(art))
-                Logger.Warn(namedLogSource, "Card object created with no art file name!");
-            ArtFileName = art;
+                Logger.Warn(namedLogSource, "Card object created with no art source file!");
+            ArtSourceFile = art;
 
             if (string.IsNullOrEmpty(artist))
                 Logger.Warn(namedLogSource, "Card object created with no artist name!");
@@ -144,7 +144,7 @@
                 return false;
             }
 
-            if (NeedsArtOverride && string.IsNullOrEmpty(ArtFileName))
+            if (NeedsArtOverride && string.IsNullOrEmpty(ArtSourceFile))
             {
                 Logger.Warn(namedLogSource, $"Art file is missing.");
                 return false;

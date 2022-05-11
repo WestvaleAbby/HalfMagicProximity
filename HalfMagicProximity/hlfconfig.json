@@ -12,21 +12,22 @@
 		"ProximityDirectory": "",
 
 		"IsTraceEnabled_Instructions": "Enables more detailed trace logs. Not needed for most users.",
-		"IsTraceEnabled": true,
+		"IsTraceEnabled": false,
 
-		"DeleteBadFaces_Instructions": "Goes through the proxies created by Proximity and deletes the half that are unusable, then collects the new ones in the output directory.",
+		"DeleteBadFaces_Instructions": "Goes through the proxies created by Proximity and deletes the half that are unusable, then collects the good ones in the output directory.",
 		"DeleteBadFaces": true,
 
 		"UpdatesOnly_Instructions": "Checks for existing proxies in the output directory, and only processes new cards.",
+		"UpdatesOnly_Instructions_2": "If this is false, the output directory will be emptied of all images before running.",
 		"UpdatesOnly": true,
 
-		"RetryCount_Instructions": "How many retries the program will do for cards that fail to render properly in Proximity.",
-		"RetryCount_Instructions_2": "Defaults to 3, which should be more than enough for small batch sizes.",
-		"RetryCount": 3,
+		"MaxRetries_Instructions": "How many retries the program will do for cards that fail to render properly in Proximity.",
+		"MaxRetries_Instructions_2": "Defaults to 3, which should be more than enough for small batch sizes.",
+		"MaxRetries": 3,
 
 		"BatchSize_Instructions": "How many cards to put in one batch. Smaller batch sizes will work better for slower computers. Defaults to 40.",
 		"BatchSize_Instructions_2": "This value must stay even in order for proxies to be deleted and renamed properly. It will be corrected to even if it's not already. ",
-		"BatchSize": 40,
+		"BatchSize": 30,
 
 		"ArtFileExtension_Instructions": "The extension for the art crop files supplied to Proximity. NOT the extension for generated proxies, those will be '.png' files.",
 		"ArtFileExtension_Instructions_2": "Defaults to '.jpg' if invalid or left blank.",
@@ -37,7 +38,7 @@
 		"ProxyRarityOverride": "uncommon",
 
 		"UseCardSubset_Instructions": "Only generate cards listed in 'CardSubset' option.",
-		"UseCardSubset": true,
+		"UseCardSubset": false,
 
 		"CardSubset_Instructions": "Add cards to this list and enable 'UseCardSubset' if you only want to generate a specific set of cards rather than the whole format.",
 		"CardSubset": [ "Fae of Wishes // Granted" ],

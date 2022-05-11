@@ -11,7 +11,6 @@ namespace HalfMagicProximity
     {
         private const string LogSource = "Batch";
         private string namedLogSource => $"{LogSource}: {name}";
-        public const int MaxCardCount = 40; // Should be even so both halves of a card end up in the same batch
 
         private ProximityManager manager;
 
@@ -29,7 +28,7 @@ namespace HalfMagicProximity
         private string templatePath => Path.Combine(ConfigManager.ProximityDirectory, "templates", templateFile);
 
         public int CardCount { get; private set; }
-        public bool IsFull => CardCount >= MaxCardCount;
+        public bool IsFull => CardCount >= ConfigManager.BatchSize;
         public bool IsBatchFunctional => !string.IsNullOrEmpty(name) && !string.IsNullOrEmpty(proximityFile) && CardCount > 0;
 
         public ProximityBatch(ProximityManager manager, string name, string prox)
@@ -255,7 +254,7 @@ namespace HalfMagicProximity
                 deckContents += cardString + Environment.NewLine;
                 CardCount++;
 
-                Logger.Trace(namedLogSource, $"{card.DisplayName} added to batch ({CardCount}/{MaxCardCount}).");
+                Logger.Trace(namedLogSource, $"{card.DisplayName} added to batch ({CardCount}/{ConfigManager.BatchSize}).");
             }
         }
 
@@ -291,7 +290,7 @@ namespace HalfMagicProximity
                 // Back faces and split cards need manually overridden art
                 if (card.NeedsArtOverride)
                 {
-                    string artPath = Path.Combine(ConfigManager.ProximityDirectory, "art", card.ArtFileName).Replace("\\", "/").Replace(" ", "%20");
+                    string artPath = Path.Combine(ConfigManager.ProximityDirectory, "art", card.ArtSourceFile).Replace("\\", "/").Replace(" ", "%20");
 
                     cardString += OverrideTemplate + "image_uris.art_crop:\"\"file:///" + artPath + "\"\"";
                 }

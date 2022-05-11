@@ -20,16 +20,26 @@ namespace HalfMagicProximity
         public void CleanProxies()
         {
             string executingDirectory = GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+            string outputDirectory = ConfigManager.OutputDirectory;
 
             if (Directory.Exists(executingDirectory))
             {
                 // Handle preparation of output directory
-                string outputDirectory = Path.Combine(executingDirectory, "proxies");
                 if (!Directory.Exists(outputDirectory))
                 {
                     Directory.CreateDirectory(outputDirectory);
 
                     Logger.Trace(LogSource, $"Created output directory: {outputDirectory}");
+                }
+                else if (!ConfigManager.UpdatesOnly)
+                {
+                    Logger.Warn(LogSource, $"Clearing output directory of all '.png' files: {outputDirectory}");
+
+                    foreach (string filePath in Directory.EnumerateFiles(outputDirectory))
+                    {
+                        if (filePath.EndsWith(".png"))
+                            File.Delete(filePath);
+                    }
                 }
 
                 // Get all raw proxy images
