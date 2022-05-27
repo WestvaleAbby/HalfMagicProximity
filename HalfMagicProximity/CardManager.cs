@@ -92,7 +92,7 @@ namespace HalfMagicProximity
                     }
 
                     // Check that all artist overrides were used
-                    if (ConfigManager.ManualArtistOverrides.Count > 0)
+                    if (ConfigManager.ManualArtistOverrides.Count > 0 && !ConfigManager.UpdatesOnly)
                     {
                         foreach (ManualArtistOverride artistOverride in ConfigManager.ManualArtistOverrides)
                         {
@@ -142,53 +142,65 @@ namespace HalfMagicProximity
                 cardFaces[i] = new CardData(
                     name,
                     GetCardProperty(jsonFaces[i], CardProperty.ManaCost),
-                    GenerateArtFileName(name, face),
+                    GenerateArtSourceFileName(name, face),
                     GetCardProperty(jsonFaces[i], CardProperty.Artist),
                     face,
                     layout,
                     GetCardProperty(jsonFaces[i], CardProperty.Watermark));
-
-                // Check for manual artist overrides and implement them
-                ManualArtistOverride manualArtistOverride = CheckForManualArtistOverride(name, face);
-                if (manualArtistOverride != null && face == manualArtistOverride.CardFace)
-                    cardFaces[i].CorrectArtist(manualArtistOverride.Artist);
-
-                Cards.Add(cardFaces[i]);
-
-                Logger.Debug(LogSource, $"{cardFaces[i].DisplayName} is legal.");
-                Logger.Trace(LogSource, $" - {cardFaces[i].Name} ({cardFaces[i].Layout} {cardFaces[i].Face})");
-                Logger.Trace(LogSource, $" - {cardFaces[i].Color} ({cardFaces[i].ColorCount} colors)");
-                Logger.Trace(LogSource, $" - Artist: {cardFaces[i].Artist} | Art: {cardFaces[i].ArtFileName}");
-                if (!string.IsNullOrEmpty(cardFaces[i].Watermark))
-                    Logger.Trace(LogSource, $" - Watermark: {cardFaces[i].Watermark}");
             }
 
             cardFaces[0].OtherFace = cardFaces[1];
             cardFaces[1].OtherFace = cardFaces[0];
 
-            if (cardFaces[0].NeedsColorOverride)
-                Logger.Trace(LogSource, $"'{cardFaces[0].Name}' needs a color override: Front is {cardFaces[0].Color}, Back is {cardFaces[1].Color}.");
-
-            if (cardFaces[0].NeedsArtistOverride)
+            foreach (CardData card in cardFaces)
             {
-                string frontArtist = cardFaces[0].Artist;
-                string backArtist = cardFaces[1].Artist;
+                // Filter out cards that already have art if we're only doing updates
+                if (ConfigManager.UpdatesOnly && 
+                    File.Exists(Path.Combine(ConfigManager.OutputDirectory, card.DisplayName + ".png")) &&
+                    File.Exists(Path.Combine(ConfigManager.OutputDirectory, card.OtherFace.DisplayName + ".png")))
+                {
+                    Logger.Trace(LogSource, $"A render already exists for {card.DisplayName}. Skipping.");
+                    continue;
+                }
 
-                if (frontArtist == backArtist)
-                    Logger.Trace(LogSource, $"'{cardFaces[0].Name}' needs an artist override since it was manually corrected.");
-                else
-                    Logger.Trace(LogSource, $"'{cardFaces[0].Name}' needs an artist override: Front is '{cardFaces[0].Artist}', Back is '{cardFaces[1].Artist}'.");
-            }
+                // Check for manual artist overrides and implement them
+                ManualArtistOverride manualArtistOverride = CheckForManualArtistOverride(name, card.Face);
+                if (manualArtistOverride != null && card.Face == manualArtistOverride.CardFace)
+                    card.CorrectArtist(manualArtistOverride.Artist);
 
-            // Some cards (some back gold faces of hybrid split cards) don't properly have their watermark in the JSON
-            if (cardFaces[0].NeedsWatermarkOverride || cardFaces[1].NeedsWatermarkOverride)
-            {
-                if (string.IsNullOrEmpty(cardFaces[0].Watermark))
-                    cardFaces[0].CorrectWatermark();
-                if (string.IsNullOrEmpty(cardFaces[1].Watermark))
-                    cardFaces[1].CorrectWatermark();
+                Cards.Add(card);
 
-                Logger.Trace(LogSource, $"'{cardFaces[0].Name}' needs a watermark override: Front is '{cardFaces[0].Watermark}'. Back is '{cardFaces[1].Watermark}'.");
+                Logger.Debug(LogSource, $"{card.DisplayName} is legal.");
+                Logger.Trace(LogSource, $" - {card.Name} ({card.Layout} {card.Face})");
+                Logger.Trace(LogSource, $" - {card.Color} ({card.ColorCount} colors)");
+                Logger.Trace(LogSource, $" - Artist: {card.Artist} | Art: {card.ArtSourceFile}");
+                if (!string.IsNullOrEmpty(card.Watermark))
+                    Logger.Trace(LogSource, $" - Watermark: {card.Watermark}");
+
+                if (card.NeedsColorOverride)
+                    Logger.Trace(LogSource, $"'{card.Name}' needs a color override: Front is {cardFaces[0].Color}, Back is {cardFaces[1].Color}.");
+
+                if (card.NeedsArtistOverride)
+                {
+                    string frontArtist = cardFaces[0].Artist;
+                    string backArtist = cardFaces[1].Artist;
+
+                    if (frontArtist == backArtist)
+                        Logger.Trace(LogSource, $"'{card.Name}' needs an artist override since it was manually corrected.");
+                    else
+                        Logger.Trace(LogSource, $"'{card.Name}' needs an artist override: Front is '{cardFaces[0].Artist}', Back is '{cardFaces[1].Artist}'.");
+                }
+
+                // Some cards (some back gold faces of hybrid split cards) don't properly have their watermark in the JSON
+                if (card.NeedsWatermarkOverride || card.OtherFace.NeedsWatermarkOverride)
+                {
+                    if (string.IsNullOrEmpty(cardFaces[0].Watermark))
+                        cardFaces[0].CorrectWatermark();
+                    if (string.IsNullOrEmpty(cardFaces[1].Watermark))
+                        cardFaces[1].CorrectWatermark();
+
+                    Logger.Trace(LogSource, $"'{card.Name}' needs a watermark override: Front is '{cardFaces[0].Watermark}'. Back is '{cardFaces[1].Watermark}'.");
+                }
             }
         }
 
@@ -203,7 +215,7 @@ namespace HalfMagicProximity
             return null;
         }
 
-        private string GenerateArtFileName(string name, CardFace face)
+        private string GenerateArtSourceFileName(string name, CardFace face)
         {
             string[] nameSubstrings = name.Split('/');
             int index = (face == CardFace.Front ? 0 : nameSubstrings.Length - 1);

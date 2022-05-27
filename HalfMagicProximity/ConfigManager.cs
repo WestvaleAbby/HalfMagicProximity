@@ -12,6 +12,16 @@ namespace HalfMagicProximity
 
         public static string ScryfallPath;
         public static string ProximityDirectory;
+        public static string OutputDirectory;
+
+        public static bool DeleteBadFaces;
+        public static bool UpdatesOnly;
+
+        public static int MaxRetries;
+        private static int defaultMaxRetries = 3;
+
+        public static int BatchSize;
+        private static int defaultBatchSize = 30;
 
         public static string ArtFileExtension;
         private static string defaultArtFileExtension = ".jpg";
@@ -19,8 +29,6 @@ namespace HalfMagicProximity
         public static string ProxyRarityOverride;
         public static bool IsProxyRarityOverrided => !string.IsNullOrEmpty(ProxyRarityOverride);
         private static string[] validRarities = { "common", "uncommon", "rare", "mythic" };
-
-        public static bool DeleteBadFaces;
 
         public static List<string> IllegalSetCodes = new List<string>();
 
@@ -48,12 +56,27 @@ namespace HalfMagicProximity
                 {
                     JsonElement configOptions = configDoc.RootElement.GetProperty("hlfOptions");
 
+                    // Pull this first so we can enable trace logs in other config option parsing methods
                     ParseIsTraceEnabled(configOptions);
+
+                    // Path options
                     if (!ParseScryfallPath(configOptions)) return;
                     if (!ParseProximityPath(configOptions)) return;
+                    ParseOutputDirectory(configOptions);
+
+                    // Boolean options
+                    ParseProxyCleanup(configOptions);
+                    ParseUpdatesOnly(configOptions);
+
+                    // Integer options
+                    ParseMaxRetries(configOptions);
+                    ParseBatchSize(configOptions);
+
+                    // String options
                     ParseArtExtension(configOptions);
                     ParseRarityOverride(configOptions);
-                    ParseProxyCleanup(configOptions);
+
+                    // Data set options
                     ParseIllegalSetCodes(configOptions);
                     ParseCardSubset(configOptions);
                     ParseManualArtistOverrides(configOptions);
@@ -70,6 +93,66 @@ namespace HalfMagicProximity
             catch (Exception e)
             {
                 Logger.Error(LogSource, $"Config Error: {e.Message}");
+            }
+        }
+
+        /// <summary>
+        /// Determine how many times to retry failed proximity renders
+        /// </summary>
+        private static void ParseMaxRetries(JsonElement configOptions)
+        {
+            try
+            {
+                int configVal = configOptions.GetProperty("MaxRetries").GetInt32();
+
+                if (configVal <= 0)
+                {
+                    Logger.Warn(LogSource, $"{configVal} retries is too low. Defaulting to {defaultMaxRetries}.");
+                    MaxRetries = defaultMaxRetries;
+                }
+                else
+                {
+                    MaxRetries = configVal;
+                    Logger.Debug(LogSource, $"Max retry count pulled from config: '{MaxRetries}'.");
+                }
+            }
+            catch
+            {
+                Logger.Warn(LogSource, $"Invalid retry count supplied. Defaulting to {defaultMaxRetries}.");
+                MaxRetries = defaultMaxRetries;
+            }
+        }
+
+        /// <summary>
+        /// Determine how many cards should be rendered at once
+        /// </summary>
+        private static void ParseBatchSize(JsonElement configOptions)
+        {
+            try
+            {
+                int configVal = configOptions.GetProperty("BatchSize").GetInt32();
+
+                if (configVal <= 0)
+                {
+                    Logger.Warn(LogSource, $"{configVal} cards per batch is too low. Defaulting to {defaultBatchSize}.");
+                    BatchSize = defaultBatchSize;
+                }
+                else if (configVal % 2 != 0)
+                {
+                    Logger.Warn(LogSource, $"Supplied batch size is odd. Correcting to {configVal+1}");
+                    BatchSize = configVal + 1;
+                }
+                else
+                {
+
+                    BatchSize = configVal;
+                    Logger.Debug(LogSource, $"Batch size pulled from config: '{BatchSize}'.");
+                }
+            }
+            catch
+            {
+                Logger.Warn(LogSource, $"Invalid batch size supplied. Defaulting to {defaultMaxRetries}.");
+                BatchSize = defaultBatchSize;
             }
         }
 
@@ -102,19 +185,19 @@ namespace HalfMagicProximity
             }
             else if (!File.Exists(scryfallString))
             {
-                Logger.Warn(LogSource, $"Scryfall JSON not found at '{scryfallString}'.");
+                Logger.Debug(LogSource, $"Scryfall JSON not found at '{scryfallString}'.");
                 validScryfallJson = false;
             }
             else if (File.Exists(scryfallString) && !IsScryfallJSON(scryfallString))
             {
-                Logger.Warn(LogSource, $"Provided JSON is not a valid Scryfall JSON file.");
+                Logger.Debug(LogSource, $"Provided JSON is not a valid Scryfall JSON file.");
                 validScryfallJson = false;
             }
 
             // If the provided JSON is not found or not set, look in the executing directory for one to use
             if (!validScryfallJson)
             {
-                Logger.Trace(LogSource, $"Attempting to pull Scryfall file from executing directory.");
+                Logger.Trace(LogSource, $"Looking for Scryfall file from executing directory.");
 
                 string scryfallDirectory = Path.Combine(GetDirectoryName(Assembly.GetExecutingAssembly().Location) + "scryfall");
 
@@ -153,58 +236,6 @@ namespace HalfMagicProximity
             {
                 ScryfallPath = scryfallString;
                 Logger.Debug(LogSource, $"Scryfall JSON pulled from config: '{ScryfallPath}'.");
-            }
-
-            return true;
-        }
-
-        /// <summary>
-        /// Try to find paths proximity directory
-        /// </summary>
-        private static bool ParseProximityPath(JsonElement configOptions)
-        {
-            // Find path to proximity files
-            string proximityString = configOptions.GetProperty("ProximityDirectory").GetString();
-            bool validProximityString = true;
-
-            if (string.IsNullOrEmpty(proximityString))
-            {
-                Logger.Debug(LogSource, $"Path to Proximity directory not supplied.");
-                validProximityString = false;
-            }
-            else if (!Directory.Exists(proximityString))
-            {
-                Logger.Warn(LogSource, $"Proximity directory not found at '{ProximityDirectory}'.");
-                validProximityString = false;
-            }
-            else if (Directory.Exists(proximityString) && !IsProximityDirectory(proximityString))
-            {
-                Logger.Warn(LogSource, $"Provided directory is not a valid Proximity directory.");
-                validProximityString = false;
-            }
-            
-            // If the provided proximity directory doesn't work or is not supplied, check the executing directory
-            if (!validProximityString)
-            {
-                Logger.Trace(LogSource, $"Attempting to find Proximity files in executing directory.");
-
-                string executingDirectory = GetDirectoryName(Assembly.GetExecutingAssembly().Location);
-
-                if (!IsProximityDirectory(executingDirectory))
-                {
-                    Logger.Error(LogSource, $"Unable to find Proximity files in executing directory!");
-                    return false;
-                }
-                else
-                {
-                    ProximityDirectory = executingDirectory;
-                    Logger.Debug(LogSource, $"Proximity files found in executing directory.");
-                }
-            }
-            else
-            {
-                ProximityDirectory = proximityString;
-                Logger.Debug(LogSource, $"Proximity files found from config: '{ProximityDirectory}'.");
             }
 
             return true;
@@ -270,6 +301,61 @@ namespace HalfMagicProximity
             return true;
         }
 
+        /// <summary>
+        /// Try to find paths proximity directory
+        /// </summary>
+        private static bool ParseProximityPath(JsonElement configOptions)
+        {
+            // Find path to proximity files
+            string proximityString = configOptions.GetProperty("ProximityDirectory").GetString();
+            bool validProximityString = true;
+
+            if (string.IsNullOrEmpty(proximityString))
+            {
+                Logger.Debug(LogSource, $"Path to Proximity directory not supplied.");
+                validProximityString = false;
+            }
+            else if (!Directory.Exists(proximityString))
+            {
+                Logger.Debug(LogSource, $"Proximity directory not found at '{proximityString}'.");
+                validProximityString = false;
+            }
+            else if (Directory.Exists(proximityString) && !IsProximityDirectory(proximityString))
+            {
+                Logger.Debug(LogSource, $"Provided directory is not a valid Proximity directory.");
+                validProximityString = false;
+            }
+
+            // If the provided proximity directory doesn't work or is not supplied, check the executing directory
+            if (!validProximityString)
+            {
+                Logger.Trace(LogSource, $"Looking for Proximity files in executing directory.");
+
+                string executingDirectory = GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+
+                if (!IsProximityDirectory(executingDirectory))
+                {
+                    Logger.Error(LogSource, $"Unable to find Proximity files in executing directory!");
+                    return false;
+                }
+                else
+                {
+                    ProximityDirectory = executingDirectory;
+                    Logger.Debug(LogSource, $"Proximity files found in executing directory.");
+                }
+            }
+            else
+            {
+                ProximityDirectory = proximityString;
+                Logger.Debug(LogSource, $"Proximity files found from config: '{ProximityDirectory}'.");
+            }
+
+            return true;
+        }
+
+        /// <summary>
+        /// Determine whether a given directory has everything in it that Proximity needs to run
+        /// </summary>
         private static bool IsProximityDirectory(string directory)
         {
             if (!Directory.Exists(directory))
@@ -296,6 +382,53 @@ namespace HalfMagicProximity
         }
 
         /// <summary>
+        /// Determine where to output final proxies
+        /// </summary>
+        private static void ParseOutputDirectory(JsonElement configOptions)
+        {
+            // Find path to proximity files
+            string outputString = configOptions.GetProperty("ProxyOutputDirectory").GetString();
+            bool validOutputString = true;
+
+            if (string.IsNullOrEmpty(outputString))
+            {
+                Logger.Debug(LogSource, $"Path to output directory not supplied.");
+                validOutputString = false;
+            }
+            else if (!Directory.Exists(outputString))
+            {
+                Logger.Debug(LogSource, $"Output directory not found at '{outputString}'.");
+                validOutputString = false;
+            }
+
+            // If the provided proximity directory doesn't work or is not supplied, check the executing directory
+            if (!validOutputString)
+            {
+                Logger.Trace(LogSource, $"Looking for output directory in executing directory.");
+
+                string executingDirectory = GetDirectoryName(Assembly.GetExecutingAssembly().Location);
+
+                string outputPath = Path.Combine(executingDirectory, "proxies");
+                if (!Directory.Exists(outputPath))
+                {
+                    Directory.CreateDirectory(outputPath);
+                    Logger.Debug(LogSource, $"Creating output directory: {outputPath}");
+                }
+                else
+                {
+                    Logger.Debug(LogSource, $"Proxies will be output here: {outputPath}");
+                }
+
+                OutputDirectory = outputPath;
+            }
+            else
+            {
+                OutputDirectory = outputString;
+                Logger.Debug(LogSource, $"Proxies will be output here: '{OutputDirectory}'.");
+            }
+        }
+
+        /// <summary>
         /// Determine what art extension to use. Defaults to '.jpg'
         /// </summary>
         private static void ParseArtExtension(JsonElement configOptions)
@@ -311,6 +444,7 @@ namespace HalfMagicProximity
                 Logger.Debug(LogSource, $"Art file extension pulled from config: '{ArtFileExtension}'.");
             }
         }
+
 
         /// <summary>
         /// Determine if we're overriding card rarity so the whole set matches
@@ -343,6 +477,18 @@ namespace HalfMagicProximity
                 Logger.Debug(LogSource, $"Bad proxy faces will be deleted once all proxies have been rendered.");
             else
                 Logger.Warn(LogSource, $"Bad proxy faces will not be automatically deleted.");
+        }
+
+        /// <summary>
+        /// Determine whether we're pulling every card or just looking for updates
+        /// </summary>
+        private static void ParseUpdatesOnly(JsonElement configOptions)
+        {
+            UpdatesOnly = configOptions.GetProperty("UpdatesOnly").GetBoolean();
+            if (UpdatesOnly)
+                Logger.Debug(LogSource, $"Only new cards will be rendered.");
+            else
+                Logger.Warn(LogSource, $"All possible cards will be rendered.");
         }
 
         /// <summary>
