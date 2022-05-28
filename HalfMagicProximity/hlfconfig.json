@@ -38,7 +38,7 @@
 		"UseCardSubset": false,
 
 		"CardSubset_Instructions": "Add cards to this list and enable 'UseCardSubset' if you only want to generate a specific set of cards rather than the whole format.",
-		"CardSubset": [ "Altar of Bhaal // Bone Offering" ],
+		"CardSubset": [ "Fae of Wishes // Granted" ],
 
 		"IllegalSetCodes_Instructions": "Sets to filter out from the legal cards. Useful for Un cards and certain promos. Don't change unless you know what you're doing.'",
 		"IllegalSetCodes": [ "htr", "cmb" ],

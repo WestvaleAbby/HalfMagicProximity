@@ -48,9 +48,9 @@ namespace HalfMagicProximity
             string logFileName = DateTime.Now.ToString("yyyy MM dd HH mm ss") + " hlflog.log";
             logFilePath = Path.Combine(logDirectory, logFileName);
 
-            File.Create(logFileName).Close();
+            File.Create(logFilePath).Close();
 
-            Debug("Logger", $"Logs are being output to '{logFileName}'.");
+            Debug("Logger", $"Logs are being output to '{logFilePath}'.");
         }
 
         /// <summary>
