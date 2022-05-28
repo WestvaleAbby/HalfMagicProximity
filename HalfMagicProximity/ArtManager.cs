@@ -91,7 +91,8 @@ namespace HalfMagicProximity
                                 {
                                     if (cardData.Face == CardFace.Back && cardData.Layout == CardLayout.Adventure)
                                     {
-                                        deleteProxy = false;
+                                        // Ignore all adventure backs if we're not pulling sketches
+                                        deleteProxy = true;
                                         Logger.Trace(LogSource, $"Skipping normal proxy for adventure backs. Wait for a sketch proxy.");
                                     }
                                     else
@@ -123,10 +124,7 @@ namespace HalfMagicProximity
 
                                         if (File.Exists(goodProxyPath))
                                         {
-                                            if (isSketch)
-                                                Logger.Debug(LogSource, $"Good sketch proxy for {cardName} overwriting previous proxy in '{goodProxyPath}'.");
-                                            else
-                                                Logger.Debug(LogSource, $"Good proxy for {cardName} copied to '{goodProxyPath}'.");
+                                            Logger.Debug(LogSource, $"Good proxy for {cardName} copied to '{goodProxyPath}'.");
                                             goodProxyCount++;
                                         }
                                         else
@@ -154,8 +152,15 @@ namespace HalfMagicProximity
                             Logger.Trace(LogSource, $"Processed {processedCount} of {totalFileCount} potential proxies.");
                         }
 
-                        // Delete file once we're done with it to keep things clean for next run
-                        File.Delete(proxyFilePath);
+                        try
+                        {
+                            // Delete file once we're done with it to keep things clean for next run
+                            File.Delete(proxyFilePath);
+                        }
+                        catch (Exception ex)
+                        {
+                            Logger.Error(LogSource, ex.Message);
+                        }
                     }
                     else
                     {
