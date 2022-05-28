@@ -7,14 +7,14 @@
     {
         private const string LogSource = "ProximityManager";
         private const string ProximityFileName = "proximity-0.6.2.jar";
-        private const string BatchNameBase = "hlf_";
-        private const string RerenderBatchNameBase = BatchNameBase + "rerender_";
+        private string BatchNameBase => "hlf_" + (renderingSketches ? "sketch_" : "");
+        private string RerenderBatchNameBase => BatchNameBase + "rerender_";
 
         private List<CardData> allCards;
         private List<ProximityBatch> batches = new List<ProximityBatch>();
         private List<ProximityBatch> rerenderBatches = new List<ProximityBatch>();
 
-        private bool renderingSketches;
+        private bool renderingSketches = false;
 
         public ProximityManager(List<CardData> allCards)
         {
