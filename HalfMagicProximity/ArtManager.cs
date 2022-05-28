@@ -17,7 +17,7 @@ namespace HalfMagicProximity
             this.cards = cards ?? throw new ArgumentNullException(nameof(cards));
         }
 
-        public void CleanProxies()
+        public void CleanProxies(bool isSketch = false)
         {
             string executingDirectory = GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             string outputDirectory = ConfigManager.OutputDirectory;
@@ -31,7 +31,7 @@ namespace HalfMagicProximity
 
                     Logger.Trace(LogSource, $"Created output directory: {outputDirectory}");
                 }
-                else if (!ConfigManager.UpdatesOnly)
+                else if (!ConfigManager.UpdatesOnly && !isSketch)
                 {
                     Logger.Warn(LogSource, $"Clearing output directory of all '.png' files: {outputDirectory}");
 
@@ -85,9 +85,18 @@ namespace HalfMagicProximity
 
                             if (cardData != null)
                             {
-                                // We want to delete even proxies for front faces and odd proxies for back cards
-                                bool deleteProxy = (cardData.Face == CardFace.Front && isEven) ||
-                                    (cardData.Face == CardFace.Back && !isEven);
+                                bool deleteProxy = false;
+                                if (!isSketch)
+                                {
+                                    // We want to delete even proxies for front faces and odd proxies for back cards
+                                    deleteProxy = (cardData.Face == CardFace.Front && isEven) ||
+                                        (cardData.Face == CardFace.Back && !isEven);
+                                }
+                                else
+                                {
+                                    // We want to copy over all sketch backs regardless of number, and delete all fronts
+                                    deleteProxy = cardData.Face == CardFace.Front;
+                                }
 
                                 // Copy good proxies to the output directory and rename them without the proximity render number in front
                                 if (!deleteProxy)
@@ -96,7 +105,8 @@ namespace HalfMagicProximity
                                     string goodProxyPath = Path.Combine(outputDirectory, cardName + ExpectedExtension);
 
                                     // If we haven't made a proxy of this card yet then make one, otherwise ignore it
-                                    if (!File.Exists(goodProxyPath))
+                                    // Always copy and overwrite good sketches
+                                    if ((!File.Exists(goodProxyPath) && !isSketch) || isSketch)
                                     {
                                         File.Copy(proxyFilePath, goodProxyPath, true);
 
