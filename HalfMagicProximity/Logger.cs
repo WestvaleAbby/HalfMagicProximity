@@ -50,7 +50,7 @@ namespace HalfMagicProximity
 
             File.Create(logFilePath).Close();
 
-            Debug("Logger", $"Logs are being output to '{logFileName}'.");
+            Debug("Logger", $"Logs are being output to '{logFilePath}'.");
         }
 
         /// <summary>
