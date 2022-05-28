@@ -28,6 +28,9 @@
         public bool NeedsArtistOverride => Artist != OtherFace.Artist || manualArtist;
         public bool NeedsWatermarkOverride => !string.IsNullOrEmpty(Watermark) || !string.IsNullOrEmpty(OtherFace.Watermark);
 
+        // All Adventure Backs (ie. the actual adventure spell) are generated with a different template from their fronts and split cards
+        public bool UseSketchTemplate => Face == CardFace.Back && Layout == CardLayout.Adventure;
+
         public CardData(string name, string manaCost, string art, string artist, CardFace face, CardLayout layout, string watermark)
         {
             if (string.IsNullOrEmpty(name))

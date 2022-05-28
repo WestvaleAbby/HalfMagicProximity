@@ -268,7 +268,7 @@ namespace HalfMagicProximity
                 }
                 else
                 {
-                    Logger.Warn(namedLogSource, $"Batch already contains {card.DisplayName}");
+                    Logger.Trace(namedLogSource, $"Already rerendering {card.DisplayName}.");
                 }
             }
         }

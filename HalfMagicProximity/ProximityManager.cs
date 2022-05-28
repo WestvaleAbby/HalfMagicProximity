@@ -33,7 +33,7 @@
             // Determine which cards are being rendered
             List<CardData> cardsToRender = allCards;
             if (renderingSketches)
-                cardsToRender = allCards.Where(x => x.Face == CardFace.Back && x.Layout == CardLayout.Adventure).ToList();
+                cardsToRender = allCards.Where(x => x.UseSketchTemplate).ToList();
 
             int batchEstimate = cardsToRender.Count / ConfigManager.BatchSize + 1;
             Logger.Info(LogSource, $"Splitting {cardsToRender.Count} cards into an estimated {batchEstimate} batches.");

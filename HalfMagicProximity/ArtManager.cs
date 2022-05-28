@@ -30,7 +30,9 @@ namespace HalfMagicProximity
                     Directory.CreateDirectory(outputDirectory);
 
                     Logger.Trace(LogSource, $"Created output directory: {outputDirectory}");
-                    Logger.Warn(LogSource, $"All non sketch proxies possibly missing from output directory: {outputDirectory}");
+
+                    if (isSketch)
+                        Logger.Warn(LogSource, $"All non sketch proxies possibly missing from output directory: {outputDirectory}");
                 }
                 else if (!ConfigManager.UpdatesOnly && !isSketch)
                 {
@@ -89,7 +91,7 @@ namespace HalfMagicProximity
                                 bool deleteProxy = false;
                                 if (!isSketch)
                                 {
-                                    if (cardData.Face == CardFace.Back && cardData.Layout == CardLayout.Adventure)
+                                    if (cardData.UseSketchTemplate)
                                     {
                                         // Ignore all adventure backs if we're not pulling sketches
                                         deleteProxy = true;
@@ -100,14 +102,18 @@ namespace HalfMagicProximity
                                         // We want to delete even proxies for front faces and odd proxies for back cards
                                         deleteProxy = (cardData.Face == CardFace.Front && isEven) ||
                                             (cardData.Face == CardFace.Back && !isEven);
-                                        Logger.Trace(LogSource, $"Deleting proxy because this is a {cardData.Face} face and the proxy is {(isEven ? "even" : "odd")}.");
+
+                                        if (deleteProxy)
+                                            Logger.Trace(LogSource, $"Deleting proxy because this is a {cardData.Face} face and the proxy is {(isEven ? "even" : "odd")}.");
                                     }
                                 }
                                 else
                                 {
                                     // We want to copy over all sketch backs regardless of number, and delete all fronts
                                     deleteProxy = cardData.Face == CardFace.Front;
-                                    Logger.Trace(LogSource, $"Deleting proxy because it's a sketch front. Sketch frame is only used for adventure backs.");
+
+                                    if (deleteProxy)
+                                        Logger.Trace(LogSource, $"Deleting proxy because it's a sketch front. Sketch frame is only used for adventure backs.");
                                 }
 
                                 // Copy good proxies to the output directory and rename them without the proximity render number in front
@@ -172,7 +178,8 @@ namespace HalfMagicProximity
                 int failedProxies = 0;
                 foreach (CardData thisCard in cards)
                 {
-                    if (!File.Exists(Path.Combine(outputDirectory, thisCard.DisplayName + ExpectedExtension)))
+                    // Don't want to report cards that are generated with a different template
+                    if (!File.Exists(Path.Combine(outputDirectory, thisCard.DisplayName + ExpectedExtension)) && isSketch == thisCard.UseSketchTemplate)
                     {
                         Logger.Warn(LogSource, $"No proxy found for {thisCard.DisplayName}.");
                         failedProxies++;
