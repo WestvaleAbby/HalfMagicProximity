@@ -35,7 +35,7 @@
 		"ProxyRarityOverride": "uncommon",
 
 		"UseCardSubset_Instructions": "Only generate cards listed in 'CardSubset' option.",
-		"UseCardSubset": true,
+		"UseCardSubset": false,
 
 		"CardSubset_Instructions": "Add cards to this list and enable 'UseCardSubset' if you only want to generate a specific set of cards rather than the whole format.",
 		"CardSubset": [ "Altar of Bhaal // Bone Offering" ],

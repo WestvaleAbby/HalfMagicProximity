@@ -150,7 +150,7 @@
                 return false;
             }
 
-            Logger.Trace(namedLogSource, $"{DisplayName} validated succesfully. No issues detected.");
+            Logger.Trace(namedLogSource, $"{DisplayName} validated successfully. No issues detected.");
 
             return true;
         }

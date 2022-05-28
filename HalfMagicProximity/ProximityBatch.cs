@@ -29,7 +29,8 @@ namespace HalfMagicProximity
         private string templateFile;
         private string templatePath => Path.Combine(ConfigManager.ProximityDirectory, "templates", templateFile);
 
-        public int CardCount { get; private set; }
+        public int CardCount => cards.Count;
+        private List<CardData> cards = new List<CardData>();
         public bool IsFull => CardCount >= ConfigManager.BatchSize;
         public bool IsBatchFunctional => !string.IsNullOrEmpty(name) && !string.IsNullOrEmpty(proximityFile) && CardCount > 0;
 
@@ -160,11 +161,11 @@ namespace HalfMagicProximity
             // Check for the proximity template file
             if (File.Exists(templatePath))
             {
-                Logger.Trace(namedLogSource, $"Batch file '{templateFile}' is present.");
+                Logger.Trace(namedLogSource, $"Template '{templateFile}' is present.");
             }
             else
             {
-                Logger.Error(namedLogSource, $"Batch file not found: {templatePath}");
+                Logger.Error(namedLogSource, $"Template not found: {templatePath}");
 
                 return false;
             }
@@ -258,10 +259,17 @@ namespace HalfMagicProximity
 
             if (!string.IsNullOrEmpty(cardString))
             {
-                deckContents += cardString + Environment.NewLine;
-                CardCount++;
+                if (!cards.Contains(card))
+                {
+                    deckContents += cardString + Environment.NewLine;
+                    cards.Add(card);
 
-                Logger.Trace(namedLogSource, $"{card.DisplayName} added to batch ({CardCount}/{ConfigManager.BatchSize}).");
+                    Logger.Trace(namedLogSource, $"{card.DisplayName} added to batch ({CardCount}/{ConfigManager.BatchSize}).");
+                }
+                else
+                {
+                    Logger.Warn(namedLogSource, $"Batch already contains {card.DisplayName}");
+                }
             }
         }
 
