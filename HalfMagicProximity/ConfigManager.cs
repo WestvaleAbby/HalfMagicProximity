@@ -14,7 +14,6 @@ namespace HalfMagicProximity
         public static string ProximityDirectory;
         public static string OutputDirectory;
 
-        public static bool DeleteBadFaces;
         public static bool UpdatesOnly;
 
         public static int MaxRetries;
@@ -65,7 +64,6 @@ namespace HalfMagicProximity
                     ParseOutputDirectory(configOptions);
 
                     // Boolean options
-                    ParseProxyCleanup(configOptions);
                     ParseUpdatesOnly(configOptions);
 
                     // Integer options
@@ -465,18 +463,6 @@ namespace HalfMagicProximity
             {
                 Logger.Debug(LogSource, $"Proxy rarity override pulled from config: '{ProxyRarityOverride}'.");
             }
-        }
-
-        /// <summary>
-        /// Determine whether we're cleaning up the generated proxies, or leaving them raw
-        /// </summary>
-        private static void ParseProxyCleanup(JsonElement configOptions)
-        {
-            DeleteBadFaces = configOptions.GetProperty("DeleteBadFaces").GetBoolean();
-            if (DeleteBadFaces)
-                Logger.Debug(LogSource, $"Bad proxy faces will be deleted once all proxies have been rendered.");
-            else
-                Logger.Warn(LogSource, $"Bad proxy faces will not be automatically deleted.");
         }
 
         /// <summary>

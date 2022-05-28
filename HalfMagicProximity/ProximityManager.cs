@@ -7,42 +7,39 @@
     {
         private const string LogSource = "ProximityManager";
         private const string ProximityFileName = "proximity-0.6.2.jar";
-        private const string BatchNameBase = "hlf_";
-        private const string RerenderBatchNameBase = BatchNameBase + "rerender_";
+        private string BatchNameBase => "hlf_" + (renderingSketches ? "sketch_" : "");
+        private string RerenderBatchNameBase => BatchNameBase + "rerender_";
 
         private List<CardData> allCards;
         private List<ProximityBatch> batches = new List<ProximityBatch>();
         private List<ProximityBatch> rerenderBatches = new List<ProximityBatch>();
+
+        private bool renderingSketches = false;
 
         public ProximityManager(List<CardData> allCards)
         {
             this.allCards = allCards ?? throw new ArgumentNullException(nameof(allCards));
         }
 
-        public void Run()
+        public void Run(bool isSketch)
         {
-            int batchEstimate = allCards.Count / ConfigManager.BatchSize + 1;
-            Logger.Info(LogSource, $"Splitting {allCards.Count} cards into an estimated {batchEstimate} batches.");
+            // Flush out any previous runs
+            batches.Clear();
+            rerenderBatches.Clear();
+            failedRenderCount = 0;
+            rerenderAttempts = 0;
+            renderingSketches = isSketch;
 
-            // Sort all cards into batches
-            int processedCardCount = 0;
-            while (processedCardCount < allCards.Count)
-            {
-                string batchName = BatchNameBase + batches.Count;
-                ProximityBatch thisBatch = new ProximityBatch(this, batchName, ProximityFileName);
-                batches.Add(thisBatch);
+            // Determine which cards are being rendered
+            List<CardData> cardsToRender = allCards;
+            if (renderingSketches)
+                cardsToRender = allCards.Where(x => x.UseSketchTemplate).ToList();
 
-                // Add cards to the most recently created batch until it's full, then create a new one
-                do
-                {
-                    thisBatch.AddCard(allCards[processedCardCount]);
-                    processedCardCount++;
+            int batchEstimate = cardsToRender.Count / ConfigManager.BatchSize + 1;
+            Logger.Info(LogSource, $"Splitting {cardsToRender.Count} cards into an estimated {batchEstimate} batches.");
 
-                    Logger.Trace(LogSource, $"Processed {processedCardCount} out of {allCards.Count}.");
-                }
-                while (!thisBatch.IsFull && processedCardCount < allCards.Count);
-            }
-            Logger.Info(LogSource, $"{batches.Count} batches successfully created.");
+            // Sort cards into batches
+            CreateBatches(cardsToRender);
 
             // Run each batch in sequence
             for (int i = 0; i < batches.Count; i++)
@@ -58,6 +55,28 @@
                 Logger.Warn(LogSource, $"There are {failedRenderCount} cards that failed to render. Trying to rerender them now.");
                 AttemptRerender();
             }
+        }
+
+        private void CreateBatches(List<CardData> cards)
+        {
+            int processedCardCount = 0;
+            while (processedCardCount < cards.Count)
+            {
+                string batchName = BatchNameBase + batches.Count;
+                ProximityBatch thisBatch = new ProximityBatch(this, batchName, ProximityFileName, renderingSketches);
+                batches.Add(thisBatch);
+
+                // Add cards to the most recently created batch until it's full, then create a new one
+                do
+                {
+                    thisBatch.AddCard(cards[processedCardCount]);
+                    processedCardCount++;
+
+                    Logger.Trace(LogSource, $"Processed {processedCardCount} out of {cards.Count}.");
+                }
+                while (!thisBatch.IsFull && processedCardCount < cards.Count);
+            }
+            Logger.Info(LogSource, $"{batches.Count} batches successfully created.");
         }
 
         private int failedRenderCount = 0;
@@ -78,8 +97,8 @@
             }
 
             if (rerenderBatches.Count == rerenderAttempts)
-                rerenderBatches.Add(new ProximityBatch(this, RerenderBatchNameBase + rerenderAttempts, ProximityFileName));
-            
+                rerenderBatches.Add(new ProximityBatch(this, RerenderBatchNameBase + rerenderAttempts, ProximityFileName, renderingSketches));
+
             // Retry both front and back to be safe
             CardData[] cardsToRerender = allCards.Where(x => x.Name.ToLower().Contains(failedCard.ToLower())).ToArray();
 

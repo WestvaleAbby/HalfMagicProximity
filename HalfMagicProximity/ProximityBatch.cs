@@ -24,14 +24,17 @@ namespace HalfMagicProximity
 
         private string proximityFile;
         private string proximityPath => Path.Combine(ConfigManager.ProximityDirectory, proximityFile);
-        private string templateFile => "hlf.zip";
+        private const string hlfTemplateFile = "hlf.zip";
+        private const string sketchTemplateFile = "hlfsketch.zip";
+        private string templateFile;
         private string templatePath => Path.Combine(ConfigManager.ProximityDirectory, "templates", templateFile);
 
-        public int CardCount { get; private set; }
+        public int CardCount => cards.Count;
+        private List<CardData> cards = new List<CardData>();
         public bool IsFull => CardCount >= ConfigManager.BatchSize;
         public bool IsBatchFunctional => !string.IsNullOrEmpty(name) && !string.IsNullOrEmpty(proximityFile) && CardCount > 0;
 
-        public ProximityBatch(ProximityManager manager, string name, string prox)
+        public ProximityBatch(ProximityManager manager, string name, string prox, bool isSketch)
         {
             this.manager = manager ?? throw new ArgumentNullException(nameof(manager));
 
@@ -44,6 +47,11 @@ namespace HalfMagicProximity
                 Logger.Error(namedLogSource, $"No proximity file provided. Unable to run proximity without the jar file!");
             else
                 proximityFile = prox;
+
+            if (isSketch)
+                templateFile = sketchTemplateFile;
+            else
+                templateFile = hlfTemplateFile;
 
             Logger.Trace(namedLogSource, $"Batch {this.name} successfully created.");
         }
@@ -153,11 +161,11 @@ namespace HalfMagicProximity
             // Check for the proximity template file
             if (File.Exists(templatePath))
             {
-                Logger.Trace(namedLogSource, $"Batch file '{templateFile}' is present.");
+                Logger.Trace(namedLogSource, $"Template '{templateFile}' is present.");
             }
             else
             {
-                Logger.Error(namedLogSource, $"Batch file not found: {templatePath}");
+                Logger.Error(namedLogSource, $"Template not found: {templatePath}");
 
                 return false;
             }
@@ -251,10 +259,17 @@ namespace HalfMagicProximity
 
             if (!string.IsNullOrEmpty(cardString))
             {
-                deckContents += cardString + Environment.NewLine;
-                CardCount++;
+                if (!cards.Contains(card))
+                {
+                    deckContents += cardString + Environment.NewLine;
+                    cards.Add(card);
 
-                Logger.Trace(namedLogSource, $"{card.DisplayName} added to batch ({CardCount}/{ConfigManager.BatchSize}).");
+                    Logger.Trace(namedLogSource, $"{card.DisplayName} added to batch ({CardCount}/{ConfigManager.BatchSize}).");
+                }
+                else
+                {
+                    Logger.Trace(namedLogSource, $"Already rerendering {card.DisplayName}.");
+                }
             }
         }
 

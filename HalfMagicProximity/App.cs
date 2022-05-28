@@ -19,10 +19,13 @@ namespace HalfMagicProximity
                 ProximityManager proximityManager = new ProximityManager(cardManager.Cards);
                 ArtManager artManager = new ArtManager(cardManager.Cards);
 
-                proximityManager.Run();
+                // Generate the front faces of adventures and all split cards with the normal M15 template
+                proximityManager.Run(isSketch:false);
+                artManager.CleanProxies(isSketch: false);
 
-                if (ConfigManager.DeleteBadFaces)
-                    artManager.CleanProxies();
+                // Generate the back faces of adventures with the sketch template
+                proximityManager.Run(isSketch:true);
+                artManager.CleanProxies(isSketch:true);
 
                 TimeSpan elapsed = timer.Elapsed;
                 string elapsedString = string.Format("{0:00}:{1:00}.{2:00}", elapsed.Minutes, elapsed.Seconds, elapsed.Milliseconds / 10);
