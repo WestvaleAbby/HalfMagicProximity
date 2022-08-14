@@ -31,6 +31,7 @@ namespace HalfMagicProximity
 
                     Logger.Trace(LogSource, $"Created output directory: {outputDirectory}");
 
+                    // M15 template is generated first, so if the output directory is being created on a different template, something likely went wrong earlier in the process
                     if (template == CardTemplate.Sketch)
                         Logger.Warn(LogSource, $"All non sketch proxies possibly missing from output directory: {outputDirectory}");
                     else if (template == CardTemplate.DoubleFeature)
@@ -139,7 +140,7 @@ namespace HalfMagicProximity
 
                                         if (File.Exists(goodProxyPath))
                                         {
-                                            Logger.Debug(LogSource, $"Good proxy for {cardName} copied to '{goodProxyPath}'.");
+                                            Logger.Debug(LogSource, $"Good proxy for {cardName} copied to output directory.");
                                             goodProxyCount++;
                                         }
                                         else

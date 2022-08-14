@@ -30,7 +30,6 @@
         private List<ProximityBatch> rerenderBatches = new List<ProximityBatch>();
 
         private CardTemplate currentTemplate = CardTemplate.M15;
-        private bool renderingDouble = false;
 
         public ProximityManager(List<CardData> allCards)
         {
