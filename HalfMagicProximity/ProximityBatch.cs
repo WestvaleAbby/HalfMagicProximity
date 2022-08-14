@@ -26,6 +26,7 @@ namespace HalfMagicProximity
         private string proximityPath => Path.Combine(ConfigManager.ProximityDirectory, proximityFile);
         private const string hlfTemplateFile = "hlf.zip";
         private const string sketchTemplateFile = "hlfsketch.zip";
+        private const string doubleFeatureTemplateFile = "hlfdoublefeature.zip";
         private string templateFile;
         private string templatePath => Path.Combine(ConfigManager.ProximityDirectory, "templates", templateFile);
 
@@ -34,7 +35,7 @@ namespace HalfMagicProximity
         public bool IsFull => CardCount >= ConfigManager.BatchSize;
         public bool IsBatchFunctional => !string.IsNullOrEmpty(name) && !string.IsNullOrEmpty(proximityFile) && CardCount > 0;
 
-        public ProximityBatch(ProximityManager manager, string name, string prox, bool isSketch)
+        public ProximityBatch(ProximityManager manager, string name, string prox, CardTemplate cardTemplate)
         {
             this.manager = manager ?? throw new ArgumentNullException(nameof(manager));
 
@@ -48,10 +49,19 @@ namespace HalfMagicProximity
             else
                 proximityFile = prox;
 
-            if (isSketch)
-                templateFile = sketchTemplateFile;
-            else
-                templateFile = hlfTemplateFile;
+            switch (cardTemplate)
+            {
+                case CardTemplate.Sketch:
+                    templateFile = sketchTemplateFile;
+                    break;
+                case CardTemplate.DoubleFeature:
+                    templateFile = doubleFeatureTemplateFile;
+                    break;
+                case CardTemplate.M15:
+                default:
+                    templateFile = hlfTemplateFile;
+                    break;
+            }
 
             Logger.Trace(namedLogSource, $"Batch {this.name} successfully created.");
         }

@@ -1,7 +1,8 @@
 ﻿namespace HalfMagicProximity
 {
-    public enum CardFace { Front, Back };
-    public enum CardLayout { Split, Adventure, None };
+    public enum CardFace { Front, Back, };
+    public enum CardLayout { Split, Adventure, };
+    public enum CardTemplate { M15, Sketch, DoubleFeature, };
 
     /// <summary>
     /// A card pulled from the Scryfall JSON
@@ -20,6 +21,7 @@
         private bool manualArtist = false;
         public CardFace Face { get; private set; }
         public CardLayout Layout { get; private set; }
+        public CardTemplate Template { get; private set; }
         public CardData OtherFace { get; set; }
         public string Watermark { get; private set; }
 
@@ -28,10 +30,7 @@
         public bool NeedsArtistOverride => Artist != OtherFace.Artist || manualArtist;
         public bool NeedsWatermarkOverride => !string.IsNullOrEmpty(Watermark) || !string.IsNullOrEmpty(OtherFace.Watermark);
 
-        // All Adventure Backs (ie. the actual adventure spell) are generated with a different template from their fronts and split cards
-        public bool UseSketchTemplate => Face == CardFace.Back && Layout == CardLayout.Adventure;
-
-        public CardData(string name, string manaCost, string art, string artist, CardFace face, CardLayout layout, string watermark)
+        public CardData(string name, string manaCost, string art, string artist, CardFace face, CardLayout layout, CardTemplate template, string watermark)
         {
             if (string.IsNullOrEmpty(name))
                 Logger.Warn(LogSource, "Card object created with no name!");
@@ -54,10 +53,10 @@
             if (string.IsNullOrEmpty(artist))
                 Logger.Warn(namedLogSource, "Card object created with no artist name!");
             Artist = artist;
-
-            if (layout == CardLayout.None)
-                Logger.Warn(namedLogSource, "Card object created with no layout!");
+            
+            // Don't need to check for empty layout/template, they have default values
             Layout = layout;
+            Template = template;
 
             // Don't need to check if watermark is empty, empty indicates no watermark
             Watermark = watermark;
