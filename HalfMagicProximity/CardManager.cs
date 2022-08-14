@@ -55,7 +55,7 @@ namespace HalfMagicProximity
                         // Filter out Alchemy cards
                         if (GetCardProperty(node, CardProperty.SetType) == "alchemy") continue;
 
-                        // Filter out non black bordered bordered cards
+                        // Filter out non black bordered cards
                         if (GetCardProperty(node, CardProperty.BorderColor) != "black") continue;
 
                         // Filter out cards from illegal sets                        
@@ -125,7 +125,6 @@ namespace HalfMagicProximity
         private void AddCard(JsonElement jsonCard)
         {
             string name = GetCardProperty(jsonCard, CardProperty.Name);
-            bool isRepeat = false;
 
             // Only add cards in the specified card list if we're using that subset of cards
             if (ConfigManager.UseCardSubset && !ConfigManager.CardSubset.Contains(name.ToLower())) return;
@@ -164,10 +163,11 @@ namespace HalfMagicProximity
 
             foreach (CardData card in cardFaces)
             {
-                // Check if this is a duplicate and whether this new version has a watermark the old one doesn't
+                // Filter out duplicate cards
                 CardData repeat = Cards.FirstOrDefault(x => x.DisplayName == card.DisplayName);
                 if (repeat != null)
                 {
+                    // Check if the duplicate has a watermark that the current version is missing before skipping it
                     if (string.IsNullOrEmpty(repeat.Watermark) && !string.IsNullOrEmpty(card.Watermark))
                     {
                         repeat.Watermark = card.Watermark;
@@ -180,8 +180,8 @@ namespace HalfMagicProximity
 
                 // Filter out cards that already have art if we're only doing updates
                 if (ConfigManager.UpdatesOnly &&
-                File.Exists(Path.Combine(ConfigManager.OutputDirectory, card.DisplayName + ".png")) &&
-                File.Exists(Path.Combine(ConfigManager.OutputDirectory, card.OtherFace.DisplayName + ".png")))
+                    File.Exists(Path.Combine(ConfigManager.OutputDirectory, card.DisplayName + ".png")) &&
+                    File.Exists(Path.Combine(ConfigManager.OutputDirectory, card.OtherFace.DisplayName + ".png")))
                 {
                     Logger.Trace(LogSource, $"A render already exists for {card.DisplayName}. Skipping.");
                     continue;
