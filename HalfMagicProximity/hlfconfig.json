@@ -12,7 +12,7 @@
 		"ProximityDirectory": "",
 
 		"IsTraceEnabled_Instructions": "Enables more detailed trace logs. Not needed for most users.",
-		"IsTraceEnabled": true,
+		"IsTraceEnabled": false,
 
 		"UpdatesOnly_Instructions": "Checks for existing proxies in the output directory, and only processes new cards.",
 		"UpdatesOnly_Instructions_2": "If this is false, the output directory will be emptied of all images before running.",
@@ -38,14 +38,35 @@
 		"UseCardSubset": false,
 
 		"CardSubset_Instructions": "Add cards to this list and enable 'UseCardSubset' if you only want to generate a specific set of cards rather than the whole format.",
-		"CardSubset": [ "Fae of Wishes // Granted" ],
+		"CardSubset": [ "Appeal // Authority" ],
 
 		"IllegalSetCodes_Instructions": "Sets to filter out from the legal cards. Useful for Un cards and certain promos. Don't change unless you know what you're doing.'",
 		"IllegalSetCodes": [ "htr", "cmb" ],
 
 		"ManualArtistOverrides_Instructions": "List cards here that need artists manually assigned.",
-		"ManualArtistOverrides_Instructions_2": "This will mostly be the back side of adventure cards, as well as any card with two arists credited for the same piece.",
+		"ManualArtistOverrides_Instructions_2": "This will mostly be the back side of adventure cards if generated with alternate art.",
+		"ManualArtistOverrides_Instructions_3": "Also includes any card with two arists credited for the same piece.",
 		"ManualArtistOverrides": [
+			{
+				"card": "Hide // Seek",
+				"face": "Front",
+				"artist": "Zoltan Boros & Gabor Szikszai"
+			},
+			{
+				"card": "Hide // Seek",
+				"face": "Back",
+				"artist": "Zoltan Boros & Gabor Szikszai"
+			},
+			{
+				"card": "Trial // Error",
+				"face": "Front",
+				"artist": "Ron Spears & Wayne Reynolds"
+			},
+			{
+				"card": "Trial // Error",
+				"face": "Back",
+				"artist": "Ron Spears & Wayne Reynolds"
+			},
 			{
 				"card": "Animating Faerie // Bring to Life",
 				"face": "Back",
@@ -195,26 +216,6 @@
 				"card": "Tuinvale Treefolk // Oaken Boon",
 				"face": "Back",
 				"artist": "James Arnold"
-			},
-			{
-				"card": "Hide // Seek",
-				"face": "Front",
-				"artist": "Zoltan Boros & Gabor Szikszai"
-			},
-			{
-				"card": "Hide // Seek",
-				"face": "Back",
-				"artist": "Zoltan Boros & Gabor Szikszai"
-			},
-			{
-				"card": "Trial // Error",
-				"face": "Front",
-				"artist": "Ron Spears & Wayne Reynolds"
-			},
-			{
-				"card": "Trial // Error",
-				"face": "Back",
-				"artist": "Ron Spears & Wayne Reynolds"
 			}
 		]
 	}

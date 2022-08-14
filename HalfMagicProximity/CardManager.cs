@@ -55,6 +55,9 @@ namespace HalfMagicProximity
                             // Card does not have frame effects. No need to act.
                         }
 
+                        // Filter out Alchemy cards
+                        if (GetCardProperty(node, CardProperty.SetType) == "alchemy") continue;
+
                         // Filter out non black bordered cards
                         if (GetCardProperty(node, CardProperty.BorderColor) != "black") continue;
 
@@ -82,7 +85,7 @@ namespace HalfMagicProximity
                     // Check that all of the cards in the card subset got used
                     if (ConfigManager.UseCardSubset)
                     {
-                        foreach(string cardName in ConfigManager.CardSubset)
+                        foreach (string cardName in ConfigManager.CardSubset)
                         {
                             CardData cardObject = Cards.Where(x => x.Name.ToLower() == cardName.ToLower()).FirstOrDefault();
 
@@ -138,6 +141,14 @@ namespace HalfMagicProximity
             for (int i = 0; i < jsonFaces.GetArrayLength(); i++)
             {
                 CardFace face = (i == 0 ? CardFace.Front : CardFace.Back);
+                CardTemplate template = CardTemplate.M15;
+                if (face == CardFace.Back)
+                {
+                    if (GetCardProperty(jsonCard, CardProperty.Keywords).ToLower().Contains("aftermath"))
+                        template = CardTemplate.DoubleFeature;
+                    else if (layout == CardLayout.Adventure)
+                        template = CardTemplate.Sketch;
+                }
 
                 cardFaces[i] = new CardData(
                     name,
@@ -146,6 +157,7 @@ namespace HalfMagicProximity
                     GetCardProperty(jsonFaces[i], CardProperty.Artist),
                     face,
                     layout,
+                    template,
                     GetCardProperty(jsonFaces[i], CardProperty.Watermark));
             }
 
@@ -155,7 +167,7 @@ namespace HalfMagicProximity
             foreach (CardData card in cardFaces)
             {
                 // Filter out cards that already have art if we're only doing updates
-                if (ConfigManager.UpdatesOnly && 
+                if (ConfigManager.UpdatesOnly &&
                     File.Exists(Path.Combine(ConfigManager.OutputDirectory, card.DisplayName + ".png")) &&
                     File.Exists(Path.Combine(ConfigManager.OutputDirectory, card.OtherFace.DisplayName + ".png")))
                 {
@@ -263,12 +275,15 @@ namespace HalfMagicProximity
             Artist,
             BorderColor,
             FrameEffects,
+            Keywords,
             Layout,
             ManaCost,
             Name,
+            //OracleText,
             Promo,
             Reprint,
             SetCode,
+            SetType,
             Watermark,
         };
 
@@ -281,12 +296,15 @@ namespace HalfMagicProximity
                 case CardProperty.Artist: return "artist";
                 case CardProperty.BorderColor: return "border_color";
                 case CardProperty.FrameEffects: return "frame_effects";
+                case CardProperty.Keywords: return "keywords";
                 case CardProperty.Layout: return "layout";
                 case CardProperty.ManaCost: return "mana_cost";
                 case CardProperty.Name: return "name";
+                //case CardProperty.OracleText: return "oracle_text";
                 case CardProperty.Promo: return "promo";
                 case CardProperty.Reprint: return "reprint";
                 case CardProperty.SetCode: return "set";
+                case CardProperty.SetType: return "set_type";
                 case CardProperty.Watermark: return "watermark";
                 default:
                     Logger.Error(LogSource, $"Tried to access a card property that doesn't exist: {property}");
@@ -301,8 +319,8 @@ namespace HalfMagicProximity
                 case "split": return CardLayout.Split;
                 case "adventure": return CardLayout.Adventure;
                 default:
-                    Logger.Error(LogSource, $"Card is missing its layout!");
-                    return CardLayout.None;
+                    Logger.Error(LogSource, $"Card is missing its layout! Defaulting to 'Split'.");
+                    return CardLayout.Split;
             }
         }
     }

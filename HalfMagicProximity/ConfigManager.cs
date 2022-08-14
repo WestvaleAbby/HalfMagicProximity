@@ -149,7 +149,7 @@ namespace HalfMagicProximity
             }
             catch
             {
-                Logger.Warn(LogSource, $"Invalid batch size supplied. Defaulting to {defaultMaxRetries}.");
+                Logger.Warn(LogSource, $"Invalid batch size supplied. Defaulting to {defaultBatchSize}.");
                 BatchSize = defaultBatchSize;
             }
         }
@@ -474,7 +474,7 @@ namespace HalfMagicProximity
             if (UpdatesOnly)
                 Logger.Debug(LogSource, $"Only new cards will be rendered.");
             else
-                Logger.Warn(LogSource, $"All possible cards will be rendered.");
+                Logger.Warn(LogSource, $"All possible cards will be rendered, not only new cards.");
         }
 
         /// <summary>

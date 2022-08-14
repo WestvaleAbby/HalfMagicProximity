@@ -17,7 +17,7 @@ namespace HalfMagicProximity
             this.cards = cards ?? throw new ArgumentNullException(nameof(cards));
         }
 
-        public void CleanProxies(bool isSketch = false)
+        public void CleanProxies(CardTemplate template)
         {
             string executingDirectory = GetDirectoryName(Assembly.GetExecutingAssembly().Location);
             string outputDirectory = ConfigManager.OutputDirectory;
@@ -31,11 +31,15 @@ namespace HalfMagicProximity
 
                     Logger.Trace(LogSource, $"Created output directory: {outputDirectory}");
 
-                    if (isSketch)
+                    // M15 template is generated first, so if the output directory is being created on a different template, something likely went wrong earlier in the process
+                    if (template == CardTemplate.Sketch)
                         Logger.Warn(LogSource, $"All non sketch proxies possibly missing from output directory: {outputDirectory}");
+                    else if (template == CardTemplate.DoubleFeature)
+                        Logger.Warn(LogSource, $"All non double feature proxies possibly missing from output directory: {outputDirectory}");
                 }
-                else if (!ConfigManager.UpdatesOnly && !isSketch)
+                else if (!ConfigManager.UpdatesOnly && template == CardTemplate.M15)
                 {
+                    // Normal frame cards get generated first, so only clear the folder the first time this is called
                     Logger.Warn(LogSource, $"Clearing output directory of all '.png' files: {outputDirectory}");
 
                     foreach (string filePath in Directory.EnumerateFiles(outputDirectory))
@@ -89,13 +93,19 @@ namespace HalfMagicProximity
                             if (cardData != null)
                             {
                                 bool deleteProxy = false;
-                                if (!isSketch)
+                                if (template == CardTemplate.M15)
                                 {
-                                    if (cardData.UseSketchTemplate)
+                                    if (cardData.Template == CardTemplate.Sketch)
                                     {
                                         // Ignore all adventure backs if we're not pulling sketches
                                         deleteProxy = true;
                                         Logger.Trace(LogSource, $"Skipping normal proxy for adventure backs. Wait for a sketch proxy.");
+                                    }
+                                    else if (cardData.Template == CardTemplate.Sketch)
+                                    {
+                                        // Ignore all adventure backs if we're not pulling sketches
+                                        deleteProxy = true;
+                                        Logger.Trace(LogSource, $"Skipping normal proxy for aftermath backs. Wait for a double feature proxy.");
                                     }
                                     else
                                     {
@@ -109,11 +119,11 @@ namespace HalfMagicProximity
                                 }
                                 else
                                 {
-                                    // We want to copy over all sketch backs regardless of number, and delete all fronts
+                                    // We want to copy over all sketch and double feature backs regardless of number, and delete all fronts
                                     deleteProxy = cardData.Face == CardFace.Front;
 
                                     if (deleteProxy)
-                                        Logger.Trace(LogSource, $"Deleting proxy because it's a sketch front. Sketch frame is only used for adventure backs.");
+                                        Logger.Trace(LogSource, $"Deleting proxy because it's a sketch or double feature front. These frames are only used for card backs.");
                                 }
 
                                 // Copy good proxies to the output directory and rename them without the proximity render number in front
@@ -123,14 +133,14 @@ namespace HalfMagicProximity
                                     string goodProxyPath = Path.Combine(outputDirectory, cardName + ExpectedExtension);
 
                                     // If we haven't made a proxy of this card yet then make one, otherwise ignore it
-                                    // Always copy and overwrite good sketches
-                                    if ((!File.Exists(goodProxyPath) && !isSketch) || isSketch)
+                                    // Always copy and overwrite good sketches and double features
+                                    if ((!File.Exists(goodProxyPath) && template == CardTemplate.M15) || template != CardTemplate.M15)
                                     {
                                         File.Copy(proxyFilePath, goodProxyPath, true);
 
                                         if (File.Exists(goodProxyPath))
                                         {
-                                            Logger.Debug(LogSource, $"Good proxy for {cardName} copied to '{goodProxyPath}'.");
+                                            Logger.Debug(LogSource, $"Good proxy for {cardName} copied to output directory.");
                                             goodProxyCount++;
                                         }
                                         else
@@ -179,7 +189,7 @@ namespace HalfMagicProximity
                 foreach (CardData thisCard in cards)
                 {
                     // Don't want to report cards that are generated with a different template
-                    if (!File.Exists(Path.Combine(outputDirectory, thisCard.DisplayName + ExpectedExtension)) && isSketch == thisCard.UseSketchTemplate)
+                    if (!File.Exists(Path.Combine(outputDirectory, thisCard.DisplayName + ExpectedExtension)) && template == thisCard.Template)
                     {
                         Logger.Warn(LogSource, $"No proxy found for {thisCard.DisplayName}.");
                         failedProxies++;
