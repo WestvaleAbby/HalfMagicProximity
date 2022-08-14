@@ -23,7 +23,7 @@
         public CardLayout Layout { get; private set; }
         public CardTemplate Template { get; private set; }
         public CardData OtherFace { get; set; }
-        public string Watermark { get; private set; }
+        public string Watermark { get; set; }
 
         public bool NeedsColorOverride => Color != OtherFace.Color;
         public bool NeedsArtOverride => Face == CardFace.Back || Layout == CardLayout.Split;

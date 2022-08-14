@@ -31,9 +31,6 @@ namespace HalfMagicProximity
                     {
                         JsonElement node = root[i];
 
-                        // Filter out reprints, so we can properly grab watermarks
-                        if (GetBooleanCardProperty(node, CardProperty.Reprint)) continue;
-
                         // Filter cards not in the Adventure or Split layout
                         string layout = GetCardProperty(node, CardProperty.Layout);
                         if (layout != "adventure" && layout != "split") continue;
@@ -166,6 +163,21 @@ namespace HalfMagicProximity
 
             foreach (CardData card in cardFaces)
             {
+                // Filter out duplicate cards
+                CardData repeat = Cards.FirstOrDefault(x => x.DisplayName == card.DisplayName);
+                if (repeat != null)
+                {
+                    // Check if the duplicate has a watermark that the current version is missing before skipping it
+                    if (string.IsNullOrEmpty(repeat.Watermark) && !string.IsNullOrEmpty(card.Watermark))
+                    {
+                        repeat.Watermark = card.Watermark;
+                        Logger.Trace(LogSource, $"Found an additional {repeat.Watermark} watermark for {repeat.DisplayName}.");
+                    }
+
+                    Logger.Trace(LogSource, $"Found a duplicate entry for {repeat.DisplayName}. Skipping.");
+                    continue;
+                }
+
                 // Filter out cards that already have art if we're only doing updates
                 if (ConfigManager.UpdatesOnly &&
                     File.Exists(Path.Combine(ConfigManager.OutputDirectory, card.DisplayName + ".png")) &&
@@ -253,6 +265,7 @@ namespace HalfMagicProximity
             return stringProperty;
         }
 
+        // Extract the value of a json element's property as a bool if able
         private bool GetBooleanCardProperty(JsonElement element, CardProperty property)
         {
             bool propertyValue = false;
@@ -281,7 +294,6 @@ namespace HalfMagicProximity
             Name,
             //OracleText,
             Promo,
-            Reprint,
             SetCode,
             SetType,
             Watermark,
@@ -302,7 +314,6 @@ namespace HalfMagicProximity
                 case CardProperty.Name: return "name";
                 //case CardProperty.OracleText: return "oracle_text";
                 case CardProperty.Promo: return "promo";
-                case CardProperty.Reprint: return "reprint";
                 case CardProperty.SetCode: return "set";
                 case CardProperty.SetType: return "set_type";
                 case CardProperty.Watermark: return "watermark";
