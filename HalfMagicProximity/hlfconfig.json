@@ -12,7 +12,7 @@
 		"ProximityDirectory": "",
 
 		"IsTraceEnabled_Instructions": "Enables more detailed trace logs. Not needed for most users.",
-		"IsTraceEnabled": false,
+		"IsTraceEnabled": true,
 
 		"UpdatesOnly_Instructions": "Checks for existing proxies in the output directory, and only processes new cards.",
 		"UpdatesOnly_Instructions_2": "If this is false, the output directory will be emptied of all images before running.",

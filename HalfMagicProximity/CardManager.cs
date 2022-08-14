@@ -31,9 +31,6 @@ namespace HalfMagicProximity
                     {
                         JsonElement node = root[i];
 
-                        // Filter out reprints, so we can properly grab watermarks
-                        if (GetBooleanCardProperty(node, CardProperty.Reprint)) continue;
-
                         // Filter cards not in the Adventure or Split layout
                         string layout = GetCardProperty(node, CardProperty.Layout);
                         if (layout != "adventure" && layout != "split") continue;
@@ -58,7 +55,7 @@ namespace HalfMagicProximity
                         // Filter out Alchemy cards
                         if (GetCardProperty(node, CardProperty.SetType) == "alchemy") continue;
 
-                        // Filter out non black bordered cards
+                        // Filter out non black bordered bordered cards
                         if (GetCardProperty(node, CardProperty.BorderColor) != "black") continue;
 
                         // Filter out cards from illegal sets                        
@@ -128,6 +125,7 @@ namespace HalfMagicProximity
         private void AddCard(JsonElement jsonCard)
         {
             string name = GetCardProperty(jsonCard, CardProperty.Name);
+            bool isRepeat = false;
 
             // Only add cards in the specified card list if we're using that subset of cards
             if (ConfigManager.UseCardSubset && !ConfigManager.CardSubset.Contains(name.ToLower())) return;
@@ -166,10 +164,24 @@ namespace HalfMagicProximity
 
             foreach (CardData card in cardFaces)
             {
+                // Check if this is a duplicate and whether this new version has a watermark the old one doesn't
+                CardData repeat = Cards.FirstOrDefault(x => x.DisplayName == card.DisplayName);
+                if (repeat != null)
+                {
+                    if (string.IsNullOrEmpty(repeat.Watermark) && !string.IsNullOrEmpty(card.Watermark))
+                    {
+                        repeat.Watermark = card.Watermark;
+                        Logger.Trace(LogSource, $"Found an additional {repeat.Watermark} watermark for {repeat.DisplayName}.");
+                    }
+
+                    Logger.Trace(LogSource, $"Found a duplicate entry for {repeat.DisplayName}. Skipping.");
+                    continue;
+                }
+
                 // Filter out cards that already have art if we're only doing updates
                 if (ConfigManager.UpdatesOnly &&
-                    File.Exists(Path.Combine(ConfigManager.OutputDirectory, card.DisplayName + ".png")) &&
-                    File.Exists(Path.Combine(ConfigManager.OutputDirectory, card.OtherFace.DisplayName + ".png")))
+                File.Exists(Path.Combine(ConfigManager.OutputDirectory, card.DisplayName + ".png")) &&
+                File.Exists(Path.Combine(ConfigManager.OutputDirectory, card.OtherFace.DisplayName + ".png")))
                 {
                     Logger.Trace(LogSource, $"A render already exists for {card.DisplayName}. Skipping.");
                     continue;
@@ -253,6 +265,7 @@ namespace HalfMagicProximity
             return stringProperty;
         }
 
+        // Extract the value of a json element's property as a bool if able
         private bool GetBooleanCardProperty(JsonElement element, CardProperty property)
         {
             bool propertyValue = false;
@@ -281,7 +294,6 @@ namespace HalfMagicProximity
             Name,
             //OracleText,
             Promo,
-            Reprint,
             SetCode,
             SetType,
             Watermark,
@@ -302,7 +314,6 @@ namespace HalfMagicProximity
                 case CardProperty.Name: return "name";
                 //case CardProperty.OracleText: return "oracle_text";
                 case CardProperty.Promo: return "promo";
-                case CardProperty.Reprint: return "reprint";
                 case CardProperty.SetCode: return "set";
                 case CardProperty.SetType: return "set_type";
                 case CardProperty.Watermark: return "watermark";
