@@ -30,7 +30,6 @@ namespace HalfMagicProximity
                     for (int i = 0; i < root.GetArrayLength(); i++)
                     {
                         JsonElement node = root[i];
-
                         // Filter cards not in the Adventure or Split layout
                         string layout = GetCardProperty(node, CardProperty.Layout);
                         if (layout != "adventure" && layout != "split") continue;
@@ -44,7 +43,17 @@ namespace HalfMagicProximity
                         {
                             JsonElement frameEffects = node.GetProperty(PropertyString(CardProperty.FrameEffects));
 
-                            if (frameEffects.GetArrayLength() > 0)
+                            string[] acceptedFrames = { "legendary" };
+                            string frameEffectsString = frameEffects.ToString();
+                            int acceptedFrameCount = 0;
+
+                            foreach (string acceptedFrame in acceptedFrames)
+                            {
+                                if (frameEffectsString.Contains(acceptedFrame))
+                                    acceptedFrameCount++;
+                            }
+
+                            if (frameEffects.GetArrayLength() > acceptedFrameCount)
                                 continue;
                         }
                         catch
